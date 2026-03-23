@@ -37,11 +37,11 @@ namespace TDKController.Interface
         /// <summary>Light curtain configuration with DIO channel mappings.</summary>
         LightCurtainConfig Config { get; set; }
 
-        /// <summary>Current voltage mode.</summary>
-        LightCurtainVoltageMode LightCurtainVoltageMode { get; set; }
+        /// <summary>Current voltage mode (read-only; use SetVoltageMode to modify).</summary>
+        LightCurtainVoltageMode LightCurtainVoltageMode { get; }
 
-        /// <summary>Current operating mode.</summary>
-        LightCurtainType LightCurtainType { get; set; }
+        /// <summary>Current operating mode (read-only; use SetLightCurtainType to modify).</summary>
+        LightCurtainType LightCurtainType { get; }
 
         #endregion
 
@@ -117,12 +117,12 @@ namespace TDKController.Interface
 
 ### GetLightCurtainDOStatus
 
-| 輸入 | 條件 | 回傳 |
-|------|------|------|
-| io = Reset/Test/Interlock/LTCLed | 組態有效 | `0` + out turnOn |
-| io = OSSD1 或 OSSD2 | DI 通道不支援 DO 讀取 | `ErrorCode.LightCurtainInvalidChannel` |
-| 任意 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` |
-| 任意 | DIO 板讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` |
+| 輸入 | 條件 | 回傳 | 副作用 |
+|------|------|------|--------|
+| io = Reset/Test/Interlock/LTCLed | 組態有效 | `0` + out turnOn | 若讀取硬體值與本地快取不同，更新屬性並觸發 `StatusChanged` |
+| io = OSSD1 或 OSSD2 | DI 通道不支援 DO 讀取 | `ErrorCode.LightCurtainInvalidChannel` | — |
+| 任意 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | — |
+| 任意 | DIO 板讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` | — |
 
 ### GetLightCurtainDIStatus
 

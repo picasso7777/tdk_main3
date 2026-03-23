@@ -147,7 +147,7 @@
 
 任何以下值變更時觸發 `StatusChanged` 事件：
 - OSSD1, OSSD2（經由 ReadLightCurtainOSSD）
-- Reset, Test, Interlock, LTCLed（經由 SetLightCurtainDOStatus / GetLightCurtainDOStatus）
+- Reset, Test, Interlock, LTCLed（經由 SetLightCurtainDOStatus 寫入後，或 GetLightCurtainDOStatus 讀取硬體值與本地快取不同時）
 - LightCurtainType（經由 SetLightCurtainType）
 - LightCurtainVoltageMode（經由 SetVoltageMode）
 

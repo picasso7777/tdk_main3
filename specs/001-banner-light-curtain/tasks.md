@@ -72,7 +72,7 @@
 
 - [ ] T014 [P] [US2] Add `SetLightCurtainType` / `GetLightCurtainType` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T015 [P] [US2] Add `SetVoltageMode` / `GetVoltageMode` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns injected config, config update propagates in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns injected config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 2
 
@@ -92,14 +92,14 @@
 ### Tests for User Story 3
 
 - [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, hardware value differs from cached value triggers `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T021 [P] [US3] Add `GetLightCurtainStatus` tests: single response returns OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, `LightCurtainType`, and `LightCurtainVoltageMode` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T022 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 3
 
 - [ ] T023 [US3] Implement `SetLightCurtainDOStatus()` — validate IO enum is DO channel, reject disabled/unconfigured/unsafe state, write via `IOBoard[].SetOutputBit()`, convert bool→byte, update property, fire `StatusChanged` in `TDKController/Module/LightCurtain.cs`
-- [ ] T024 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, read via `IOBoard[].GetOutputBit()`, convert byte→bool in `TDKController/Module/LightCurtain.cs`
+- [ ] T024 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, guard config-null, read via `IOBoard[].GetOutputBit()`, convert byte→bool, compare with cached property and fire `StatusChanged` if changed in `TDKController/Module/LightCurtain.cs`
 - [ ] T025 [US3] Implement `GetLightCurtainStatus()` — return a single-response snapshot using `LightCurtainStatusChangedEventArgs` in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: All user stories independently functional — full DIO read/write, safety detection, configuration, and status reporting
@@ -213,7 +213,7 @@ T010: GetLightCurtainDIStatus tests
 - `ReadLightCurtainOSSD()` reads physical DIO and updates OSSD properties; `GetLightCurtainStatus()` returns the latest single-response snapshot using the same state model as `StatusChanged`
 - No internal polling thread — caller drives all reads
 - DO channels total 4: Reset, Test, Interlock, LTCLed — where LTCLed is FR-001 所述的 status indicator
-- All public operation methods must guard with a config-null check at entry and return `LightCurtainNotConfigured` if `Config` has not been set
+- All public DIO operation methods (ReadOSSD, GetDI, SetDO, GetDO, GetStatus) must guard with a config-null check at entry and return `LightCurtainNotConfigured` if `Config` has not been set. Mode/voltage setters do not require this guard.
 - FR-007 defines the unsafe state condition and its auto-clear rule (no manual reset); FR-008 defines the alarm event firing on safe→unsafe transition — auto-clear in FR-008 means the alarm condition clears silently (no event fired on unsafe→safe)
 - Changing `LightCurtainType` mode does not affect existing alarm state — alarm is driven solely by OSSD values
 - Constructor parameter order follows T005: `LightCurtainConfig` first, then `IOBoard[]`, then `ILogUtility`
