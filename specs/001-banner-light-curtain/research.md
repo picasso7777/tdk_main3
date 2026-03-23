@@ -4,7 +4,7 @@
 
 ## R1: DIO 存取模式
 
-**Decision**: 透過 `IIOBoard[]` 陣列索引存取 DIO 板，使用 `SetOutputBit`/`GetOutputBit`/`GetInputBit` 方法，搭配 `DioChannelConfig` 結構定位通道。
+**Decision**: 透過 `IOBoard[]` 陣列索引存取 DIO 板，使用 `SetOutputBit`/`GetOutputBit`/`GetInputBit` 方法，搭配 `DioChannelConfig` 結構定位通道。
 
 **Rationale**:
 - `IDO.SetOutputBit(portIndex, bitIndex, byte value)` — value 為 `byte` (0/1)，非 `bool`
@@ -12,6 +12,7 @@
 - `IDI.GetInputBit(portIndex, bitIndex, out byte value)` — out 為 `byte`
 - 所有方法回傳 `int` 錯誤碼（0 = 成功）
 - PlantUML 規格使用 `bool` turnOn 參數，需在模組內做 `bool ↔ byte` 轉換
+- 使用者已確認建構函式注入型別以 `IOBoard[]` 為準
 
 **Alternatives considered**:
 - 使用 `SetOutput`/`GetInput` 整 port 讀寫 — 不適合，因為每個光幕訊號映射至獨立 bit，且整 port 寫入可能影響其他 bit
@@ -50,7 +51,7 @@
 **Rationale**:
 - 目前 C# 程式碼中不存在這三個 enum
 - 放在介面檔與介面消費者同一命名空間，方便引用
-- 遵循 `ErrorCode` enum 定義於 Interface 目錄的先例
+- 遵循介面相關共用型別集中於 Interface 目錄的既有模式
 
 **Alternatives considered**:
 - 放在 Config 目錄 — 不符合介面導向設計，enum 主要由介面方法簽章使用
@@ -70,7 +71,7 @@
 
 ## R6: ErrorCode 擴充
 
-**Decision**: 在 `ErrorCode` enum 中新增以下 LightCurtain 範圍錯誤碼：
+**Decision**: 在 `ErrorCode.cs` 中以 `const int` 定義以下 LightCurtain 範圍錯誤碼：
 
 | 值 | 名稱 | 說明 |
 |----|------|------|
@@ -82,7 +83,9 @@
 | -405 | LightCurtainInvalidChannel | 指定的 IO 通道無效 |
 | -406 | LightCurtainUnsafeState | 光幕處於不安全狀態，拒絕操作 |
 
-**Rationale**: 對應規格 FR-011 要求的不同失敗情境，每個情境一個明確錯誤碼。
+**Rationale**:
+- 對應規格 FR-011 要求的不同失敗情境，每個情境一個明確錯誤碼
+- 使用者已確認採用 `const int`，以符合 spec 與 constitution
 
 ## R7: bool ↔ byte 轉換策略
 
@@ -97,10 +100,19 @@
 
 ## R8: 建構函式簽章
 
-**Decision**: `LightCurtain(LightCurtainConfig config, IIOBoard[] ioBoards, ILogUtility logger)`
+**Decision**: `LightCurtain(LightCurtainConfig config, IOBoard[] ioBoards, ILogUtility logger)`
 
 **Rationale**:
 - PlantUML 指定 `LightCurtain(config : LightCurtainConfig, iIOBoard : IOBoard[])`
 - 規格 FR-001 要求注入 `IOBoard[]` 陣列與 `ILogUtility`
 - 憲章要求 ILogUtility 透過建構函式注入
 - config 在前（與 LoadportActor 模式一致），ioBoards 次之，logger 最後
+
+## R9: Full Status Snapshot
+
+**Decision**: 提供 dedicated `GetLightCurtainStatus(...)` 方法，並重用 `LightCurtainStatusChangedEventArgs` 作為單次回傳的完整狀態資料模型。
+
+**Rationale**:
+- 使用者已確認 User Story 3 需要 single-response status snapshot API
+- 重用既有 `LightCurtainStatusChangedEventArgs` 可避免再新增未授權資料類別
+- 這個資料模型已完整涵蓋 OSSD1、OSSD2、四個 DO、運行模式與電壓模式

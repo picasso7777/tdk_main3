@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/001-banner-light-curtain/`
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, contracts/ ✅, quickstart.md ✅
 
-**Tests**: Included — spec FR-011 implies comprehensive validation; constitution mandates ≥ 90% coverage for core logic.
+**Tests**: Included — spec FR-011 implies comprehensive validation; constitution mandates XML docs, English implementation comments, and ≥ 90% coverage for core logic.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -17,11 +17,11 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Enums, structs, EventArgs, ErrorCode 擴充 — 所有 user story 共享的型別基礎
+**Purpose**: Enums, structs, EventArgs, const int 錯誤碼定義 — 所有 user story 共享的型別基礎
 
 - [ ] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
 - [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
-- [ ] T003 [P] Add LightCurtain error codes (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) to `TDKController/Interface/ErrorCode.cs`
+- [ ] T003 [P] Define LightCurtain `const int` error codes (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
 
 ---
 
@@ -31,9 +31,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Expand `ILightCurtain` interface with full member signatures (properties, methods, events) per contract in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T005 Implement `LightCurtain` constructor with `LightCurtainConfig`, `IIOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`
-- [ ] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: DioDeviceID range check against `IIOBoard[]` length, DO channel duplicate check for identical `(DioDeviceID, PortID, Channel_BitIndex)` tuples) in `TDKController/Module/LightCurtain.cs`
+- [ ] T004 Expand `ILightCurtain` interface with full member signatures (properties, methods, events, and `GetLightCurtainStatus(...)`) per contract in `TDKController/Interface/ILightCurtain.cs`
+- [ ] T005 Implement `LightCurtain` constructor with `LightCurtainConfig`, `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`
+- [ ] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: required mapping completeness, `DioDeviceID` range check against `IOBoard[]` length, and duplicate channel checks across all DI/DO tuples) in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: Foundation ready — `ILightCurtain` fully declared, `LightCurtain` constructable with valid config
 
@@ -48,15 +48,15 @@
 ### Tests for User Story 1
 
 - [ ] T007 [P] [US1] Create test class and constructor injection tests (null-check, valid construction) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, DIO read failure in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T009 [P] [US1] Add `OSSDAlarmTriggered` event tests: safe→unsafe fires alarm, unsafe→safe auto-clears without event, alarm includes correct OSSD values in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T010 [P] [US1] Add `TriggerLightCurtainAlarm` tests: virtual IO trigger raises alarm when OSSD cached values indicate unsafe, no alarm when safe, does NOT re-read physical DIO in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement `ReadLightCurtainOSSD()` — read both OSSD DI channels via `IIOBoard[].GetInputBit()`, convert byte→bool, update properties, detect safe→unsafe transition and fire `OSSDAlarmTriggered` event, fire `StatusChanged` on any change in `TDKController/Module/LightCurtain.cs`
-- [ ] T012 [US1] Implement `TriggerLightCurtainAlarm()` — designed for virtual IO trigger scenario; use cached OSSD1/OSSD2 property values (do NOT re-read physical DIO) to evaluate alarm condition, raise `OSSDAlarmTriggered` event if unsafe in `TDKController/Module/LightCurtain.cs`
-- [ ] T013 [US1] Implement `GetLightCurtainDIStatus()` — read single DI channel (OSSD1 or OSSD2) via `IIOBoard[].GetInputBit()`, return `LightCurtainInvalidChannel` for DO enum values in `TDKController/Module/LightCurtain.cs`
+- [ ] T011 [US1] Implement `ReadLightCurtainOSSD()` — read both OSSD DI channels via `IOBoard[].GetInputBit()`, convert byte→bool, update properties, detect safe→unsafe transition and fire `OSSDAlarmTriggered` event, fire `StatusChanged` on any change in `TDKController/Module/LightCurtain.cs`
+- [ ] T012 [US1] Implement `GetLightCurtainDIStatus()` — read single DI channel (OSSD1 or OSSD2) via `IOBoard[].GetInputBit()`, return `LightCurtainInvalidChannel` for DO enum values in `TDKController/Module/LightCurtain.cs`
+- [ ] T013 [US1] Implement shared unsafe-state evaluation helper used by OSSD reads and output-operation guards in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: OSSD safety detection fully functional — can read safety inputs, detect unsafe states, and emit alarms
 
@@ -87,18 +87,20 @@
 
 **Goal**: Allow callers to set/get DO output signals and read full status
 
-**Independent Test**: Set a DO output, read it back, verify `StatusChanged` fires with updated state; attempt invalid operations (DI channel for DO write, disabled mode) and verify correct error codes
+**Independent Test**: Request a full status snapshot, set a DO output, read it back, verify `StatusChanged` fires with updated state; attempt invalid operations (DI channel for DO write, disabled mode, unsafe state) and verify correct error codes
 
 ### Tests for User Story 3
 
-- [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, disabled mode returns `LightCurtainDisabled`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T021 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T021 [P] [US3] Add `GetLightCurtainStatus` tests: single response returns OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, `LightCurtainType`, and `LightCurtainVoltageMode` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T022 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement `SetLightCurtainDOStatus()` — validate IO enum is DO channel, check LightCurtainType != Disable, write via `IIOBoard[].SetOutputBit()`, convert bool→byte, update property, fire `StatusChanged` in `TDKController/Module/LightCurtain.cs`
-- [ ] T023 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, read via `IIOBoard[].GetOutputBit()`, convert byte→bool in `TDKController/Module/LightCurtain.cs`
+- [ ] T023 [US3] Implement `SetLightCurtainDOStatus()` — validate IO enum is DO channel, reject disabled/unconfigured/unsafe state, write via `IOBoard[].SetOutputBit()`, convert bool→byte, update property, fire `StatusChanged` in `TDKController/Module/LightCurtain.cs`
+- [ ] T024 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, read via `IOBoard[].GetOutputBit()`, convert byte→bool in `TDKController/Module/LightCurtain.cs`
+- [ ] T025 [US3] Implement `GetLightCurtainStatus()` — return a single-response snapshot using `LightCurtainStatusChangedEventArgs` in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: All user stories independently functional — full DIO read/write, safety detection, configuration, and status reporting
 
@@ -106,11 +108,12 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final validation, region organization, edge case coverage
+**Purpose**: Final validation, documentation alignment, region organization, edge case coverage, and coverage verification
 
-- [ ] T024 Add edge case tests: operations before valid config, mode change while alarmed, mismatched OSSD states, duplicate DO channel mappings in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T025 Verify and finalize `#region` organization in `TDKController/Module/LightCurtain.cs` — regions: Constants, Construction, IO Status Properties, Configuration & Mode, DI Operations, DO Operations, OSSD Safety Detection, Event Helpers
-- [ ] T026 Run quickstart.md validation — build `TDKController.csproj`, build test project, run all LightCurtain tests
+- [ ] T026 Add edge case tests: operations before valid config, mode change while alarmed, missing mappings, duplicated DI/DO mappings, and mismatched OSSD states in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T027 Add XML documentation comments to public API and English implementation comments to non-trivial logic in `TDKController/Interface/ILightCurtain.cs`, `TDKController/Config/LightCurtainConfig.cs`, and `TDKController/Module/LightCurtain.cs`
+- [ ] T028 Verify and finalize `#region` organization in `TDKController/Module/LightCurtain.cs` — regions: Constants, Construction, IO Status Properties, Configuration & Mode, DI Operations, DO Operations, Status Snapshot, OSSD Safety Detection, Event Helpers
+- [ ] T029 Run quickstart.md validation — build `TDKController.csproj`, build test project, run all LightCurtain tests, and collect coverage for `TDKController/Module/LightCurtain.cs`
 
 ---
 
@@ -149,7 +152,7 @@ Within Phase 4 (US2 tests):
 - T014, T015, T016 — all parallel
 
 Within Phase 5 (US3 tests):
-- T019, T020, T021 — all parallel
+- T019, T020, T021, T022 — all parallel
 
 ---
 
@@ -159,7 +162,7 @@ Within Phase 5 (US3 tests):
 # All three tasks can run in parallel (different files):
 T001: Define enums and EventArgs in ILightCurtain.cs
 T002: Define DioChannelConfig and LightCurtainConfig in LightCurtainConfig.cs
-T003: Add ErrorCode entries in ErrorCode.cs
+T003: Define LightCurtain const int error codes in ErrorCode.cs
 ```
 
 ## Parallel Example: User Story 1 Tests
@@ -169,7 +172,7 @@ T003: Add ErrorCode entries in ErrorCode.cs
 T007: Constructor tests
 T008: ReadLightCurtainOSSD tests
 T009: OSSDAlarmTriggered event tests
-T010: TriggerLightCurtainAlarm tests
+T010: GetLightCurtainDIStatus tests
 ```
 
 ---
@@ -189,31 +192,31 @@ T010: TriggerLightCurtainAlarm tests
 1. Setup + Foundational → Types and skeleton ready
 2. Add User Story 1 → Safety detection works → **MVP!**
 3. Add User Story 2 → Mode/voltage configuration works
-4. Add User Story 3 → Full DO control and status reporting
-5. Polish → Edge cases, region cleanup, validation
+4. Add User Story 3 → Full DO control and single-response status snapshot
+5. Polish → Edge cases, documentation, region cleanup, validation
 
 ### File Impact Summary
 
 | File | Tasks | Operation |
 |------|-------|-----------|
-| `TDKController/Interface/ILightCurtain.cs` | T001, T004 | Modify (expand stub) |
-| `TDKController/Config/LightCurtainConfig.cs` | T002 | Modify (expand stub) |
-| `TDKController/Interface/ErrorCode.cs` | T003 | Modify (add entries) |
-| `TDKController/Module/LightCurtain.cs` | T005, T006, T011–T013, T017–T018, T022–T023, T025 | Modify (expand stub) |
-| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | T007–T010, T014–T016, T019–T021, T024 | Create (new file) |
+| `TDKController/Interface/ILightCurtain.cs` | T001, T004, T027 | Modify (expand stub and add XML docs) |
+| `TDKController/Config/LightCurtainConfig.cs` | T002, T027 | Modify (expand stub and add comments) |
+| `TDKController/Interface/ErrorCode.cs` | T003 | Modify (add const int entries) |
+| `TDKController/Module/LightCurtain.cs` | T005, T006, T011–T013, T017–T018, T023–T025, T027–T028 | Modify (expand stub, add comments, finalize regions) |
+| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | T007–T010, T014–T016, T019–T022, T026 | Create (new file) |
 
 ---
 
 ## Notes
 
 - All DIO methods use `byte` (0/1) — module converts `bool ↔ byte` internally
-- `ReadLightCurtainOSSD()` reads physical DIO and updates OSSD properties; `TriggerLightCurtainAlarm()` uses cached OSSD values only (for future virtual IO trigger scenario) — both can fire `OSSDAlarmTriggered` event
+- `ReadLightCurtainOSSD()` reads physical DIO and updates OSSD properties; `GetLightCurtainStatus()` returns the latest single-response snapshot using the same state model as `StatusChanged`
 - No internal polling thread — caller drives all reads
 - DO channels total 4: Reset, Test, Interlock, LTCLed — where LTCLed is FR-001 所述的 status indicator
 - All public operation methods must guard with a config-null check at entry and return `LightCurtainNotConfigured` if `Config` has not been set
 - FR-007 defines the unsafe state condition and its auto-clear rule (no manual reset); FR-008 defines the alarm event firing on safe→unsafe transition — auto-clear in FR-008 means the alarm condition clears silently (no event fired on unsafe→safe)
 - Changing `LightCurtainType` mode does not affect existing alarm state — alarm is driven solely by OSSD values
-- Constructor parameter order follows T005: `LightCurtainConfig` first, then `IIOBoard[]`, then `ILogUtility`
-- Error codes in range -400..-406 per constitution allocation
+- Constructor parameter order follows T005: `LightCurtainConfig` first, then `IOBoard[]`, then `ILogUtility`
+- Error codes in range -400..-406 are defined as `const int` per constitution allocation
 - Single test file for all LightCurtain tests per constitution's test file consolidation rule
-- Same-file tasks marked `[P]` (e.g., T007–T010, T014–T016, T019–T021) denote logical independence only — they must be written sequentially since they target the same file
+- Same-file tasks marked `[P]` (e.g., T007–T010, T014–T016, T019–T022) denote logical independence only — they must be written sequentially since they target the same file

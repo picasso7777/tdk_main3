@@ -43,12 +43,12 @@ As a maintenance or host-side consumer, I need to read the current light curtain
 
 **Why this priority**: Status visibility and controllable outputs improve supportability and diagnostics, but they depend on the core safety and configuration behavior being present first.
 
-**Independent Test**: Can be fully tested by reading the full logical state, changing a supported output signal, and confirming that the reported status reflects the new state.
+**Independent Test**: Can be fully tested by requesting a full status snapshot, changing a supported output signal, and confirming that the reported status reflects the new state.
 
 **Acceptance Scenarios**:
 
-1. **Given** a configured light curtain, **When** a caller requests the current status, **Then** the system returns the current values for both safety inputs, all supported output signals, the operating mode, and the voltage mode in a single response.
-2. **Given** a configured light curtain in a mode that allows output control, **When** a caller sets a supported output signal, **Then** the system updates the signal state and publishes an updated status notification.
+1. **Given** a configured light curtain, **When** a caller requests a full status snapshot, **Then** the system returns the current values for both safety inputs, all four supported output signals, the operating mode, and the voltage mode in a single response.
+2. **Given** a configured light curtain in a non-disabled mode, **When** a caller sets a supported output signal, **Then** the system updates the signal state and publishes an updated status notification.
 
 ### Edge Cases
 
@@ -56,18 +56,18 @@ As a maintenance or host-side consumer, I need to read the current light curtain
 - One safety channel reports safe while the other reports unsafe, creating a mismatched safety state.
 - A caller requests status or output control before a valid configuration has been accepted.
 - The operating mode changes while the light curtain is already in an alarmed or unsafe state.
-- A caller attempts to control outputs while the feature is disabled or while the current state is not safe for continued operation.
+- A caller attempts to control outputs while the feature is disabled, unconfigured, or currently unsafe.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST support a Banner light curtain profile with two safety input channels (DI) and four controllable output signals (DO) plus one status indicator output. The module receives an `IOBoard[]` array and an `ILogUtility` instance via constructor injection, and accesses each channel through `DioChannelConfig.DioDeviceID` as the array index.
+- **FR-001**: The system MUST support a Banner light curtain profile with two safety input channels (DI) and four controllable output signals (DO): `Reset`, `Test`, `Interlock`, and `LTCLed`. `LTCLed` is included in the four DO total and serves as the status indicator output. The module receives an `IOBoard[]` array and an `ILogUtility` instance via constructor injection, and accesses each channel through `DioChannelConfig.DioDeviceID` as the array index.
 - **FR-002**: The system MUST allow callers to define, update, and retrieve the light curtain configuration for each controller instance.
 - **FR-003**: The system MUST validate that all required signal mappings are complete, non-conflicting, and usable before the light curtain can be enabled.
 - **FR-004**: The system MUST support three operating modes: disabled, enabled during transfer only, and enabled at all times.
 - **FR-005**: The system MUST support two voltage modes representing the installed light curtain polarity options and report the currently selected mode.
-- **FR-006**: The system MUST allow callers to read the current logical state of both safety input channels and all supported output signals on demand via explicit method calls (e.g. `ReadLightCurtainOSSD()`). The module does not contain an internal polling thread; polling responsibility belongs to the caller.
+- **FR-006**: The system MUST allow callers to read the current logical state of both safety input channels and all supported output signals on demand via explicit method calls, including a dedicated full-status snapshot method that returns both safety inputs, all four DO signals, the operating mode, and the voltage mode in a single response. The module does not contain an internal polling thread; polling responsibility belongs to the caller.
 - **FR-007**: The system MUST treat the light curtain as unsafe when either safety input indicates interruption, fault, or a mismatched safety condition. The unsafe state MUST auto-clear when both safety inputs return to safe values; no explicit reset action is required.
 - **FR-008**: The system MUST generate an alarm notification whenever the light curtain transitions from a safe state to an unsafe state, including the current values of both safety inputs. The alarm condition clears automatically when both OSSD channels report safe.
 - **FR-009**: The system MUST generate a status change notification whenever any reported logical signal, operating mode, or voltage mode changes.
@@ -79,14 +79,15 @@ As a maintenance or host-side consumer, I need to read the current light curtain
 ### Key Entities *(include if feature involves data)*
 
 - **Light Curtain Configuration**: Defines the required signal mappings, selected operating mode, and selected voltage mode for one standalone Banner light curtain instance.
-- **Light Curtain State**: Represents the current logical values of the two safety inputs, the supported outputs, and the active mode selections used by callers to determine whether the curtain is safe.
+- **Light Curtain State**: Represents the current logical values of the two safety inputs, the four supported outputs, and the active mode selections used by callers to determine whether the curtain is safe.
 - **Alarm Notification**: Represents a safety event raised when the light curtain transitions into an unsafe state and includes the safety input values that caused the alarm.
 - **Status Change Notification**: Represents the latest reported operating state after any signal, operating mode, or voltage mode change.
+- **Status Snapshot Response**: Represents the full current state returned by the dedicated status method in a single response payload.
 
 ### Assumptions
 
 - Each Banner light curtain instance is managed independently and has no coupling to LoadportActor or loadport workflows.
-- The transfer-only operating mode is activated and deactivated by an external caller; the module itself does not monitor or depend on loadport status, load/unload commands, or transfer workflow state.
+- The transfer-only operating mode is activated and deactivated by an external caller; the module itself does not monitor or depend on loadport status, load/unload commands, or transfer workflow state, and it does not introduce additional DO permission gating beyond the existing disabled, unconfigured, and unsafe checks.
 - Alarm and status notifications are consumed through existing controller-side notification patterns rather than requiring a new standalone user interface.
 
 ## Clarifications
@@ -98,6 +99,9 @@ As a maintenance or host-side consumer, I need to read the current light curtain
 - Q: OSSD 安全輸入應該如何被讀取？ → A: 被動式，外部呼叫者主動呼叫 ReadLightCurtainOSSD() 讀取，模組不含內部輪詢執行緒。
 - Q: LightCurtain 錯誤碼範圍？ → A: -400..-499（專案規範已預分配）。
 - Q: LightCurtain 是否需要注入 ILogUtility？ → A: 是，構造函式注入 ILogUtility。
+- Q: LightCurtain 的 DO 數量是否包含 LTCLed？ → A: 是，總數固定為 4 個 DO：Reset、Test、Interlock、LTCLed。
+- Q: Host/maintenance 端如何在單次呼叫中取得完整狀態？ → A: 提供 dedicated full-status snapshot method，回傳兩個 OSSD、四個 DO、LightCurtainType、LightCurtainVoltageMode。
+- Q: transfer-only 模式是否需要額外的 runtime transfer window 權限判定？ → A: 不需要；輸出控制不因 transfer-only 額外受限，僅在 disabled、unconfigured 或 unsafe 時拒絕。
 
 ## Success Criteria *(mandatory)*
 

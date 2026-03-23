@@ -38,6 +38,8 @@
 
 ### ErrorCode 擴充（-400..-499 範圍）
 
+以下為 `ErrorCode.cs` 中的 `const int` 定義。
+
 | 成員 | 值 | 說明 |
 |------|-----|------|
 | LightCurtainError | -400 | 基底錯誤（已存在）|
@@ -56,7 +58,7 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| DioDeviceID | int | `IIOBoard[]` 陣列索引 |
+| DioDeviceID | int | `IOBoard[]` 陣列索引 |
 | PortID | int | Port 索引（零起始）|
 | Channel_BitIndex | int | Port 內 bit 索引（零起始）|
 
@@ -90,9 +92,9 @@
 | LightCurtainVoltageMode | LightCurtainVoltageMode | 電壓模式 |
 
 **驗證規則** (FR-003):
-- 所有 6 個 DioChannelConfig 的 `DioDeviceID` 必須在 `IIOBoard[]` 陣列索引範圍內
-- 不得有兩個 DO 通道映射到相同的 (DioDeviceID, PortID, Channel_BitIndex) 組合
-- DI 通道與 DO 通道的重疊不作限制（因型別不同）
+- 所有 6 個 DioChannelConfig 的 `DioDeviceID` 必須在 `IOBoard[]` 陣列索引範圍內
+- 所有 required mappings 必須完整提供，不得保留未設定的預設值
+- 任兩個 required signals 不得映射到相同的 `(DioDeviceID, PortID, Channel_BitIndex)` 組合，不區分 DI/DO 類型
 
 ### LightCurtainAlarmEventArgs
 
@@ -107,7 +109,7 @@
 
 ### LightCurtainStatusChangedEventArgs
 
-用途：狀態變更事件資料，任何邏輯訊號、運行模式或電壓模式變更時觸發。
+用途：狀態變更事件資料，任何邏輯訊號、運行模式或電壓模式變更時觸發。此型別同時作為 `GetLightCurtainStatus(...)` 的完整狀態快照資料模型。
 
 | 屬性 | 型別 | 說明 |
 |------|------|------|
@@ -154,10 +156,11 @@
 ```
 LightCurtain ─implements─> ILightCurtain
 LightCurtain ─has─> LightCurtainConfig (1:1, via Config property)
-LightCurtain ─uses─> IIOBoard[] (injected, indexed by DioChannelConfig.DioDeviceID)
+LightCurtain ─uses─> IOBoard[] (injected, indexed by DioChannelConfig.DioDeviceID)
 LightCurtain ─uses─> ILogUtility (injected, for logging)
 LightCurtain ─emits─> LightCurtainAlarmEventArgs
 LightCurtain ─emits─> LightCurtainStatusChangedEventArgs
+LightCurtain ─returns─> LightCurtainStatusChangedEventArgs (status snapshot)
 LightCurtainConfig ─contains─> DioChannelConfig (6 instances: 4 DO + 2 DI)
 ```
 

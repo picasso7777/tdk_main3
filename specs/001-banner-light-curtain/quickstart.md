@@ -25,7 +25,7 @@ nunit3-console.exe AutoTest/TDKController.Tests/bin/Debug/TDKController.Tests.dl
 
 ```csharp
 // 準備 DIO 板陣列
-IIOBoard[] ioBoards = new IIOBoard[] { dio0, dio1, dio2, dio3 };
+IOBoard[] ioBoards = new IOBoard[] { dio0, dio1, dio2, dio3 };
 
 // 準備組態
 var config = new LightCurtainConfig
@@ -69,10 +69,22 @@ void OnStatusChanged(object sender, LightCurtainStatusChangedEventArgs e)
 
 ```csharp
 // 外部呼叫者主動讀取 OSSD（模組無內部輪詢）
-ErrorCode result = lightCurtain.ReadLightCurtainOSSD();
-if (result == ErrorCode.Success)
+int result = lightCurtain.ReadLightCurtainOSSD();
+if (result == 0)
 {
     bool isSafe = lightCurtain.OSSD1 && lightCurtain.OSSD2;
+}
+```
+
+### 取得完整狀態快照
+
+```csharp
+LightCurtainStatusChangedEventArgs status;
+int result = lightCurtain.GetLightCurtainStatus(out status);
+if (result == 0)
+{
+    logger.WriteLog("LTC", LogHeadType.Normal,
+        $"Snapshot: OSSD1={status.OSSD1}, OSSD2={status.OSSD2}, Reset={status.Reset}, LTCLed={status.LTCLed}");
 }
 ```
 
@@ -80,7 +92,7 @@ if (result == ErrorCode.Success)
 
 ```csharp
 // 設定 Reset 輸出為 High
-ErrorCode result = lightCurtain.SetLightCurtainDOStatus(LightCurtainIO.Reset, true);
+int result = lightCurtain.SetLightCurtainDOStatus(LightCurtainIO.Reset, true);
 
 // 讀取 Interlock 輸出狀態
 bool interlock;
@@ -103,7 +115,7 @@ lightCurtain.GetLightCurtainType(out currentType);
 | 檔案 | 操作 |
 |------|------|
 | `TDKController/Interface/ILightCurtain.cs` | 修改（擴充介面、新增 enum 與 EventArgs）|
-| `TDKController/Interface/ErrorCode.cs` | 修改（新增 LightCurtain 範圍錯誤碼）|
+| `TDKController/Interface/ErrorCode.cs` | 修改（新增 LightCurtain `const int` 錯誤碼）|
 | `TDKController/Config/LightCurtainConfig.cs` | 修改（擴充為完整 Config + DioChannelConfig struct）|
 | `TDKController/Module/LightCurtain.cs` | 修改（完整實作）|
 | `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 新增（單元測試）|
