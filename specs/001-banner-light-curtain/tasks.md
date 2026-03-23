@@ -22,11 +22,11 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Enums, structs, EventArgs, const int 錯誤碼定義 — 所有 user story 共享的型別基礎
+**Purpose**: Enums, structs, EventArgs, ErrorCode enum 錨誤碼定義 — 所有 user story 共享的型別基礎
 
 - [ ] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
 - [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
-- [ ] T003 [P] Define LightCurtain `const int` error codes (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
+- [ ] T003 [P] Define LightCurtain `ErrorCode` enum members (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
 
 ---
 
@@ -120,7 +120,7 @@
 - [ ] T028 Verify and finalize `#region` organization in `TDKController/Module/LightCurtain.cs` — regions: Constants, Construction, IO Status Properties, Configuration & Mode, DI Operations, DO Operations, Status Snapshot, OSSD Safety Detection, Event Helpers
 - [ ] T029 Run quickstart.md validation — build `TDKController.csproj`, build the test project, run all LightCurtain tests, and verify unit test coverage for `TDKController/Module/LightCurtain.cs` is at least 90%; treat coverage below 90% as a validation failure
 - [ ] T030 Validate SC-001 via quickstart workflow — confirm a single Banner light curtain instance can complete configuration setup, configuration validation, and configuration readback within 5 minutes under the documented validation flow
-- [ ] T031 Validate SC-004 via repeated status-snapshot verification — confirm `GetLightCurtainStatus` returns the complete expected status fields for all defined verification cases; if sampling is used, success rate must not be below 95%
+- [ ] T031 Validate SC-004 via repeated status-snapshot verification — confirm `GetLightCurtainStatus` returns the complete expected status fields for all defined verification cases with a 100% success rate
 
 ---
 
@@ -224,6 +224,6 @@ T010: GetLightCurtainDIStatus tests
 - FR-007 defines the unsafe state condition and its auto-clear rule (no manual reset); FR-008 defines the alarm event firing on safe→unsafe transition — auto-clear in FR-008 means the alarm condition clears silently (no event fired on unsafe→safe)
 - Changing `LightCurtainType` mode does not affect existing alarm state — alarm is driven solely by OSSD values
 - Constructor parameter order follows T005: `LightCurtainConfig` first, then `IOBoard[]`, then `ILogUtility`
-- Error codes in range -400..-406 are defined as `const int` per constitution allocation
+- Error codes in range -400..-406 are defined as `ErrorCode` enum members per constitution allocation
 - Single test file for all LightCurtain tests per constitution's test file consolidation rule
 - Same-file tasks marked `[P]` (e.g., T007–T010, T014–T016, T019–T022) denote logical independence only — they must be written sequentially since they target the same file

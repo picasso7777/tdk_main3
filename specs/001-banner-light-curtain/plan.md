@@ -32,7 +32,7 @@
 | 5 | 事件相依性訂閱規則 | ✅ N/A | 本功能不涉及 IConnector 注入與替換 |
 | 6 | IDisposable 模組生命週期 | ⚠️ N/A | 目前規格未要求實作 IDisposable |
 | 7 | 例外處理與日誌 | ✅ PASS | 公開操作須以 try-catch 保護並透過 ILogUtility 記錄 |
-| 8 | 錯誤碼範圍 -400..-499 | ✅ PASS | LightCurtain 使用專案預留的 -400..-499 範圍 |
+| 8 | 錯誤碼範圍 -400..-499 | ✅ PASS | LightCurtain 使用專案預留的 -400..-499 範圍，定義為 `ErrorCode` enum 成員 |
 | 9 | 單一 .cs 檔案 | ✅ PASS | 模組實作集中於 [TDKController/Module/LightCurtain.cs](TDKController/Module/LightCurtain.cs) |
 | 10 | 禁止未授權類別 | ✅ PASS | 完整狀態快照重用既有狀態資料形狀，不新增額外快照類別 |
 | 11 | 介面使用政策 | ✅ PASS | [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 與 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 已同步記錄本 feature 對 [TDKController/Interface/ILightCurtain.cs](TDKController/Interface/ILightCurtain.cs) 的核准例外 |

@@ -38,7 +38,7 @@
 
 ### ErrorCode 擴充（-400..-499 範圍）
 
-以下為 `ErrorCode.cs` 中的 `const int` 定義。
+以下為 `ErrorCode.cs` 中的 `ErrorCode` enum 成員定義。
 
 | 成員 | 值 | 說明 |
 |------|-----|------|

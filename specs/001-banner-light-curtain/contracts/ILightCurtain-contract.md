@@ -48,34 +48,34 @@ namespace TDKController.Interface
         #region Methods
 
         /// <summary>Sets the operating mode.</summary>
-        int SetLightCurtainType(LightCurtainType lightCurtainType);
+        ErrorCode SetLightCurtainType(LightCurtainType lightCurtainType);
 
         /// <summary>Gets the current operating mode.</summary>
-        int GetLightCurtainType(out LightCurtainType lightCurtainType);
+        ErrorCode GetLightCurtainType(out LightCurtainType lightCurtainType);
 
         /// <summary>Sets the voltage mode.</summary>
-        int SetVoltageMode(LightCurtainVoltageMode lightCurtainVoltageMode);
+        ErrorCode SetVoltageMode(LightCurtainVoltageMode lightCurtainVoltageMode);
 
         /// <summary>Gets the current voltage mode.</summary>
-        int GetVoltageMode(out LightCurtainVoltageMode lightCurtainVoltageMode);
+        ErrorCode GetVoltageMode(out LightCurtainVoltageMode lightCurtainVoltageMode);
 
         /// <summary>
         /// Reads OSSD safety inputs from DIO hardware.
         /// Updates OSSD1/OSSD2 properties and triggers alarm/status events if changed.
         /// </summary>
-        int ReadLightCurtainOSSD();
+        ErrorCode ReadLightCurtainOSSD();
 
         /// <summary>Gets a single-response snapshot of the current light curtain state.</summary>
-        int GetLightCurtainStatus(out LightCurtainStatusChangedEventArgs status);
+        ErrorCode GetLightCurtainStatus(out LightCurtainStatusChangedEventArgs status);
 
         /// <summary>Sets a DO channel to specified state.</summary>
-        int SetLightCurtainDOStatus(LightCurtainIO io, bool turnOn);
+        ErrorCode SetLightCurtainDOStatus(LightCurtainIO io, bool turnOn);
 
         /// <summary>Gets the current state of a DO channel.</summary>
-        int GetLightCurtainDOStatus(LightCurtainIO io, out bool turnOn);
+        ErrorCode GetLightCurtainDOStatus(LightCurtainIO io, out bool turnOn);
 
         /// <summary>Gets the current state of a DI channel.</summary>
-        int GetLightCurtainDIStatus(LightCurtainIO io, out bool value);
+        ErrorCode GetLightCurtainDIStatus(LightCurtainIO io, out bool value);
 
         #endregion
 
@@ -108,7 +108,7 @@ namespace TDKController.Interface
 
 | 輸入 | 條件 | 回傳 |
 |------|------|------|
-| io = Reset/Test/Interlock/LTCLed | 組態有效 且 非 Disable | `0` |
+| io = Reset/Test/Interlock/LTCLed | 組態有效 且 非 Disable | `ErrorCode.Success` |
 | io = OSSD1 或 OSSD2 | DI 通道不支援 DO 寫入 | `ErrorCode.LightCurtainInvalidChannel` |
 | 任意 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` |
 | 任意 | 功能停用 (Disable) | `ErrorCode.LightCurtainDisabled` |
@@ -119,7 +119,7 @@ namespace TDKController.Interface
 
 | 輸入 | 條件 | 回傳 | 副作用 |
 |------|------|------|--------|
-| io = Reset/Test/Interlock/LTCLed | 組態有效 | `0` + out turnOn | 若讀取硬體值與本地快取不同，更新屬性並觸發 `StatusChanged` |
+| io = Reset/Test/Interlock/LTCLed | 組態有效 | `ErrorCode.Success` + out turnOn | 若讀取硬體值與本地快取不同，更新屬性並觸發 `StatusChanged` |
 | io = OSSD1 或 OSSD2 | DI 通道不支援 DO 讀取 | `ErrorCode.LightCurtainInvalidChannel` | — |
 | 任意 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | — |
 | 任意 | DIO 板讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` | — |
@@ -128,7 +128,7 @@ namespace TDKController.Interface
 
 | 輸入 | 條件 | 回傳 |
 |------|------|------|
-| io = OSSD1 或 OSSD2 | 組態有效 | `0` + out value |
+| io = OSSD1 或 OSSD2 | 組態有效 | `ErrorCode.Success` + out value |
 | io = Reset/Test/Interlock/LTCLed | DO 通道不支援 DI 讀取 | `ErrorCode.LightCurtainInvalidChannel` |
 | 任意 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` |
 | 任意 | DIO 板讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` |
@@ -137,14 +137,14 @@ namespace TDKController.Interface
 
 | 條件 | 回傳 | 副作用 |
 |------|------|--------|
-| 組態有效 | `0` + out status | 回傳模組內部快取值（OSSD1、OSSD2、Reset、Test、Interlock、LTCLed、LightCurtainType、LightCurtainVoltageMode），不觸發硬體 I/O |
+| 組態有效 | `ErrorCode.Success` + out status | 回傳模組內部快取值（OSSD1、OSSD2、Reset、Test、Interlock、LTCLed、LightCurtainType、LightCurtainVoltageMode），不觸發硬體 I/O |
 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | 不回傳快照 |
 
 ### ReadLightCurtainOSSD
 
 | 條件 | 回傳 | 副作用 |
 |------|------|--------|
-| 組態有效，兩通道讀取成功 | `0` | 更新 OSSD1/OSSD2 屬性；若狀態變更則觸發 StatusChanged；若從安全→不安全則觸發 OSSDAlarmTriggered |
+| 組態有效，兩通道讀取成功 | `ErrorCode.Success` | 更新 OSSD1/OSSD2 屬性；若狀態變更則觸發 StatusChanged；若從安全→不安全則觸發 OSSDAlarmTriggered |
 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | 不更新狀態 |
 | DIO 讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` | 不更新狀態 |
 
@@ -152,7 +152,7 @@ namespace TDKController.Interface
 
 | 條件 | 回傳 | 副作用 |
 |------|------|--------|
-| 有效 enum 值 | `0` | 更新對應屬性；若值變更則觸發 StatusChanged |
+| 有效 enum 值 | `ErrorCode.Success` | 更新對應屬性；若值變更則觸發 StatusChanged |
 
 **同步規則**：`SetLightCurtainType` / `SetVoltageMode` 僅修改模組級 mode 屬性，不回寫 `LightCurtainConfig` 物件。Config setter 則同步更新模組級 mode 屬性（見上方 Config setter 行為表）。
 
