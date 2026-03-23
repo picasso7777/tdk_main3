@@ -55,7 +55,7 @@
 - [ ] T007 [P] [US1] Create test class and constructor injection tests (null-check, valid construction) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure, not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T009 [P] [US1] Add `OSSDAlarmTriggered` event tests: safe→unsafe fires alarm, unsafe→safe auto-clears without event, alarm includes correct OSSD values in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, Disable mode DI read still returns `Success` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 1
 
@@ -77,7 +77,7 @@
 
 - [ ] T014 [P] [US2] Add `SetLightCurtainType` / `GetLightCurtainType` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T015 [P] [US2] Add `SetVoltageMode` / `GetVoltageMode` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns accepted config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, rejected invalid config does not overwrite the previously accepted valid config, and Config setter that changes `LightCurtainType` or `LightCurtainVoltageMode` fires `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns accepted config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, rejected invalid config does not overwrite the previously accepted valid config, Config setter that changes `LightCurtainType` or `LightCurtainVoltageMode` fires `StatusChanged`, and `SetLightCurtainType`/`SetVoltageMode` do not write back to the `Config` object (one-way sync) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 2
 
@@ -121,6 +121,8 @@
 - [ ] T029 Run quickstart.md validation — build `TDKController.csproj`, build the test project, run all LightCurtain tests, and verify unit test coverage for `TDKController/Module/LightCurtain.cs` is at least 90%; treat coverage below 90% as a validation failure
 - [ ] T030 Validate SC-001 via quickstart workflow — confirm a single Banner light curtain instance can complete configuration setup, configuration validation, and configuration readback within 5 minutes under the documented validation flow
 - [ ] T031 Validate SC-004 via repeated status-snapshot verification — confirm `GetLightCurtainStatus` returns the complete expected status fields for all defined verification cases with a 100% success rate
+- [ ] T032 Validate SC-002 via safety-detection verification — confirm all unsafe conditions (single-channel break, dual-channel break, mismatched OSSD states) are correctly identified within the same `ReadLightCurtainOSSD` call with a 100% detection rate across all defined test cases
+- [ ] T033 Validate SC-003 via operating-mode verification — confirm users can correctly distinguish Disable, Enable_InTransfer, and Enable_Always modes in 100% of defined mode-switching test cases
 
 ---
 
@@ -210,7 +212,7 @@ T010: GetLightCurtainDIStatus tests
 | `TDKController/Config/LightCurtainConfig.cs` | T002, T027 | Modify |
 | `TDKController/Interface/ErrorCode.cs` | T003 | Modify |
 | `TDKController/Module/LightCurtain.cs` | T005, T006, T011–T013, T017–T018, T023–T025, T027–T029 | Modify |
-| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | T007–T010, T014–T016, T019–T022, T026, T030, T031 | Create as the single approved module test file |
+| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | T007–T010, T014–T016, T019–T022, T026, T030–T033 | Create as the single approved module test file |
 
 ---
 
