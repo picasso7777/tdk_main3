@@ -49,11 +49,16 @@
     <Compile Include="Unit\IDReaderHermesRFIDTests.cs" />
     <Compile Include="Unit\IDReaderOmronASCIITests.cs" />
     <Compile Include="Unit\IDReaderOmronHexTests.cs" />
+    <Compile Include="Unit\LightCurtainTests.cs" />
     <Compile Include="Unit\ProtocolFrameAssemblyTests.cs" />
     <Compile Include="Unit\LoadportActorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DIO\DIO.csproj">
+      <Project>{8EFC1D03-A9D7-427A-B1E9-B4FD3CCC77BD}</Project>
+      <Name>DIO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\TDKController\TDKController.csproj">
       <Project>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</Project>
       <Name>TDKController</Name>

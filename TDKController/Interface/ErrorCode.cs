@@ -78,5 +78,23 @@ namespace TDKController
 
         /// <summary>Base Light Curtain error.</summary>
         LightCurtainError = -400,
+
+        /// <summary>Light curtain configuration has not been accepted yet.</summary>
+        LightCurtainNotConfigured = -401,
+
+        /// <summary>Light curtain output operation is rejected because the feature is disabled.</summary>
+        LightCurtainDisabled = -402,
+
+        /// <summary>Light curtain DIO read operation failed.</summary>
+        LightCurtainDioReadFailed = -403,
+
+        /// <summary>Light curtain DIO write operation failed.</summary>
+        LightCurtainDioWriteFailed = -404,
+
+        /// <summary>The requested light curtain I/O channel is invalid for the operation.</summary>
+        LightCurtainInvalidChannel = -405,
+
+        /// <summary>The requested light curtain output operation is rejected because the curtain is unsafe.</summary>
+        LightCurtainUnsafeState = -406,
     }
 }

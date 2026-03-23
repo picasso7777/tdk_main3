@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\CarrierIDReaderConfig.cs" />
+    <Compile Include="Config\LightCurtainConfig.cs" />
     <Compile Include="Config\LoadportActorConfig.cs" />
     <Compile Include="GUI\ConnectionPage.cs">
       <SubType>UserControl</SubType>
@@ -144,6 +145,7 @@
     <Compile Include="Module\IDReaderHermesRFID.cs" />
     <Compile Include="Module\IDReaderOmronASCII.cs" />
     <Compile Include="Module\IDReaderOmronHex.cs" />
+    <Compile Include="Module\LightCurtain.cs" />
     <Compile Include="Module\LoadportActor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -186,6 +188,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DIO\DIO.csproj">
+      <Project>{8EFC1D03-A9D7-427A-B1E9-B4FD3CCC77BD}</Project>
+      <Name>DIO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EFEMDataCenter\EFEMDataCenter.csproj">
       <Project>{8f394e36-c16e-4bcf-bae7-128ab15cf5b8}</Project>
       <Name>EFEMDataCenter</Name>

@@ -24,9 +24,9 @@
 
 **Purpose**: Enums, structs, EventArgs, ErrorCode enum 錯誤碼定義 — 所有 user story 共享的型別基礎
 
-- [ ] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class (change access modifier from `internal` to `public`) with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
-- [ ] T003 [P] Define LightCurtain `ErrorCode` enum members (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
+- [X] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
+- [X] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class (change access modifier from `internal` to `public`) with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
+- [X] T003 [P] Define LightCurtain `ErrorCode` enum members (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
 
 ---
 
@@ -36,9 +36,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Expand `ILightCurtain` with only the feature-approved member signatures required by the contract, including properties, methods, events, and `GetLightCurtainStatus(...)` in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T005 Implement `LightCurtain` constructor with `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`; also change class access modifier from `internal` to `public` to satisfy `ILightCurtain` interface visibility
-- [ ] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: required mapping completeness, `DioDeviceID` range check against `IOBoard[]` length, and duplicate channel checks across all DI/DO tuples) in `TDKController/Module/LightCurtain.cs`
+- [X] T004 Expand `ILightCurtain` with only the feature-approved member signatures required by the contract, including properties, methods, events, and `GetLightCurtainStatus(...)` in `TDKController/Interface/ILightCurtain.cs`
+- [X] T005 Implement `LightCurtain` constructor with `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`; also change class access modifier from `internal` to `public` to satisfy `ILightCurtain` interface visibility
+- [X] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: required mapping completeness, `DioDeviceID` range check against `IOBoard[]` length, and duplicate channel checks across all DI/DO tuples) in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: Foundation ready — `ILightCurtain` fully declared, `LightCurtain` constructable; Config set via property setter post-construction
 
@@ -52,16 +52,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Create test class and constructor injection tests (null-check, valid construction) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure, not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T009 [P] [US1] Add `OSSDAlarmTriggered` event tests: safe→unsafe fires alarm, unsafe→safe auto-clears without event, alarm includes correct OSSD values in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, Disable mode DI read still returns `Success` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T007 [P] [US1] Create test class and constructor injection tests (null-check, valid construction) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure, not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T009 [P] [US1] Add `OSSDAlarmTriggered` event tests: safe→unsafe fires alarm, unsafe→safe auto-clears without event, alarm includes correct OSSD values in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, Disable mode DI read still returns `Success` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement `ReadLightCurtainOSSD()` — read both OSSD DI channels via `IOBoard[].GetInputBit()`, convert byte→bool, update properties, detect safe→unsafe transition and fire `OSSDAlarmTriggered` event, fire `StatusChanged` on any change in `TDKController/Module/LightCurtain.cs`
-- [ ] T012 [US1] Implement `GetLightCurtainDIStatus()` — read single DI channel (OSSD1 or OSSD2) via `IOBoard[].GetInputBit()`, return `LightCurtainInvalidChannel` for DO enum values in `TDKController/Module/LightCurtain.cs`
-- [ ] T013 [US1] Implement shared unsafe-state evaluation helper used by OSSD reads and output-operation guards in `TDKController/Module/LightCurtain.cs`
+- [X] T011 [US1] Implement `ReadLightCurtainOSSD()` — read both OSSD DI channels via `IOBoard[].GetInputBit()`, convert byte→bool, update properties, detect safe→unsafe transition and fire `OSSDAlarmTriggered` event, fire `StatusChanged` on any change in `TDKController/Module/LightCurtain.cs`
+- [X] T012 [US1] Implement `GetLightCurtainDIStatus()` — read single DI channel (OSSD1 or OSSD2) via `IOBoard[].GetInputBit()`, return `LightCurtainInvalidChannel` for DO enum values in `TDKController/Module/LightCurtain.cs`
+- [X] T013 [US1] Implement shared unsafe-state evaluation helper used by OSSD reads and output-operation guards in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: OSSD safety detection fully functional — can read safety inputs, detect unsafe states, and emit alarms
 
@@ -75,14 +75,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Add `SetLightCurtainType` / `GetLightCurtainType` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T015 [P] [US2] Add `SetVoltageMode` / `GetVoltageMode` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns accepted config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, rejected invalid config does not overwrite the previously accepted valid config, Config setter that changes `LightCurtainType` or `LightCurtainVoltageMode` fires `StatusChanged`, and `SetLightCurtainType`/`SetVoltageMode` do not write back to the `Config` object (one-way sync) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T014 [P] [US2] Add `SetLightCurtainType` / `GetLightCurtainType` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T015 [P] [US2] Add `SetVoltageMode` / `GetVoltageMode` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T016 [P] [US2] Add `Config` property tests: config readback returns accepted config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, rejected invalid config does not overwrite the previously accepted valid config, Config setter that changes `LightCurtainType` or `LightCurtainVoltageMode` fires `StatusChanged`, and `SetLightCurtainType`/`SetVoltageMode` do not write back to the `Config` object (one-way sync) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement `SetLightCurtainType()` and `GetLightCurtainType()` — store mode, fire `StatusChanged` on change in `TDKController/Module/LightCurtain.cs`
-- [ ] T018 [US2] Implement `SetVoltageMode()` and `GetVoltageMode()` — store mode, fire `StatusChanged` on change in `TDKController/Module/LightCurtain.cs`
+- [X] T017 [US2] Implement `SetLightCurtainType()` and `GetLightCurtainType()` — store mode, fire `StatusChanged` on change in `TDKController/Module/LightCurtain.cs`
+- [X] T018 [US2] Implement `SetVoltageMode()` and `GetVoltageMode()` — store mode, fire `StatusChanged` on change in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: Configuration fully functional — modes can be set/retrieved with change notifications
 
@@ -96,16 +96,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, hardware value differs from cached value triggers `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T021 [P] [US3] Add `GetLightCurtainStatus` tests: single response returns OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, `LightCurtainType`, and `LightCurtainVoltageMode` using the same data shape as `StatusChanged`, and not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T022 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, hardware value differs from cached value triggers `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T021 [P] [US3] Add `GetLightCurtainStatus` tests: single response returns OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, `LightCurtainType`, and `LightCurtainVoltageMode` using the same data shape as `StatusChanged`, and not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T022 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Implement `SetLightCurtainDOStatus()` — validate IO enum is DO channel, reject disabled/unconfigured/unsafe state, write via `IOBoard[].SetOutputBit()`, convert bool→byte, update property, fire `StatusChanged` in `TDKController/Module/LightCurtain.cs`
-- [ ] T024 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, guard config-null, read via `IOBoard[].GetOutputBit()`, convert byte→bool, compare with cached property and fire `StatusChanged` if changed in `TDKController/Module/LightCurtain.cs`
-- [ ] T025 [US3] Implement `GetLightCurtainStatus()` — return a single-response snapshot using the same data shape as `LightCurtainStatusChangedEventArgs` in `TDKController/Module/LightCurtain.cs`
+- [X] T023 [US3] Implement `SetLightCurtainDOStatus()` — validate IO enum is DO channel, reject disabled/unconfigured/unsafe state, write via `IOBoard[].SetOutputBit()`, convert bool→byte, update property, fire `StatusChanged` in `TDKController/Module/LightCurtain.cs`
+- [X] T024 [US3] Implement `GetLightCurtainDOStatus()` — validate IO enum is DO channel, guard config-null, read via `IOBoard[].GetOutputBit()`, convert byte→bool, compare with cached property and fire `StatusChanged` if changed in `TDKController/Module/LightCurtain.cs`
+- [X] T025 [US3] Implement `GetLightCurtainStatus()` — return a single-response snapshot using the same data shape as `LightCurtainStatusChangedEventArgs` in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: All user stories independently functional — full DIO read/write, safety detection, configuration, and status reporting
 
@@ -115,9 +115,9 @@
 
 **Purpose**: Final validation, documentation alignment, approved-exception alignment, region organization, edge case coverage, success-criteria verification, and coverage-gate verification
 
-- [ ] T026 Add edge case tests: operations before valid config, mode change while alarmed, missing mappings, duplicated DI/DO mappings, and mismatched OSSD states in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T027 Add XML documentation comments to public API and English implementation comments to non-trivial logic in `TDKController/Interface/ILightCurtain.cs`, `TDKController/Config/LightCurtainConfig.cs`, and `TDKController/Module/LightCurtain.cs`
-- [ ] T028 Verify and finalize `#region` organization in `TDKController/Module/LightCurtain.cs` — regions: Constants, Construction, IO Status Properties, Configuration & Mode, DI Operations, DO Operations, Status Snapshot, OSSD Safety Detection, Event Helpers
+- [X] T026 Add edge case tests: operations before valid config, mode change while alarmed, missing mappings, duplicated DI/DO mappings, and mismatched OSSD states in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [X] T027 Add XML documentation comments to public API and English implementation comments to non-trivial logic in `TDKController/Interface/ILightCurtain.cs`, `TDKController/Config/LightCurtainConfig.cs`, and `TDKController/Module/LightCurtain.cs`
+- [X] T028 Verify and finalize `#region` organization in `TDKController/Module/LightCurtain.cs` — regions: Constants, Construction, IO Status Properties, Configuration & Mode, DI Operations, DO Operations, Status Snapshot, OSSD Safety Detection, Event Helpers
 - [ ] T029 Run quickstart.md validation — build `TDKController.csproj`, build the test project, run all LightCurtain tests, and verify unit test coverage for `TDKController/Module/LightCurtain.cs` is at least 90%; treat coverage below 90% as a validation failure
 - [ ] T030 Validate SC-001 via quickstart workflow — confirm a single Banner light curtain instance can complete configuration setup, configuration validation, and configuration readback within 5 minutes under the documented validation flow
 - [ ] T031 Validate SC-004 via repeated status-snapshot verification — confirm `GetLightCurtainStatus` returns the complete expected status fields for all defined verification cases with a 100% success rate
