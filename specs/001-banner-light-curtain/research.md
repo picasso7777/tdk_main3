@@ -116,3 +116,29 @@
 - 使用者已確認 User Story 3 需要 single-response status snapshot API
 - 重用既有 `LightCurtainStatusChangedEventArgs` 可避免再新增未授權資料類別
 - 這個資料模型已完整涵蓋 OSSD1、OSSD2、四個 DO、運行模式與電壓模式
+
+## R10: Interface Mode/Voltage Properties Read-Only
+
+**Decision**: `ILightCurtain` 介面上的 `LightCurtainType` 與 `LightCurtainVoltageMode` 屬性宣告為 `{ get; }`（唯讀），修改僅透過 `SetLightCurtainType()` 與 `SetVoltageMode()` 方法進行。
+
+**Rationale**:
+- Property setter 無法回傳 `int` 錯誤碼，呼叫者無法得知操作是否成功
+- Property setter 無法觸發 `StatusChanged` 事件（除非以隱式副作用實作，但違反最小驚訝原則）
+- 保留可寫 setter 會使呼叫者繞過驗證與事件機制
+- Set 方法已提供完整的錯誤回傳與事件觸發行為，setter 為冗餘入口
+
+**Alternatives considered**:
+- 保留 setter 並內部轉呼叫 Set 方法（忽略回傳值）— 隱式副作用難以除錯
+- 移除 Set 方法、保留 setter — 無法回傳錯誤碼，違反統一錯誤碼政策
+
+## R11: GetDOStatus Triggers StatusChanged on Mismatch
+
+**Decision**: `GetLightCurtainDOStatus()` 讀取硬體 DO 狀態後，若與本地快取值不同，則更新屬性並觸發 `StatusChanged` 事件。
+
+**Rationale**:
+- DO 輸出值可能被外部因素改變（例如 DIO 板硬體重置、其他控制器寫入同一 port）
+- Get 操作讀取實際硬體值，若與模組快取不一致，需同步內部狀態並通知消費者
+- 確保 `StatusChanged` 事件完整反映所有可偵測的狀態變化，而非僅限於本模組的寫入操作
+
+**Alternatives considered**:
+- Get 操作不觸發事件（純讀取）— 可能導致模組內部狀態與硬體不同步，消費者感知不到外部變更

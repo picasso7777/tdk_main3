@@ -37,7 +37,7 @@
 | 10 | 禁止未授權類別 | ✅ PASS | 使用既有 `DioChannelConfig` 結構與 `ErrorCode` 常數定義；完整狀態查詢重用 `LightCurtainStatusChangedEventArgs` 作為回傳資料模型 |
 | 11 | 介面優先 | ✅ PASS | 透過 `ILightCurtain` 介面暴露 |
 | 12 | Lambda 使用規則 | ✅ PASS | 無 lambda 需求 |
-| 13 | #region 分區 | ✅ PASS | 將按職責分區：Constants / Construction / Properties / DO Operations / DI Operations / Config & Mode / Events |
+| 13 | #region 分區 | ✅ PASS | 將按職責分區：Constants / Construction / IO Status Properties / Configuration & Mode / DI Operations / DO Operations / Status Snapshot / OSSD Safety Detection / Event Helpers |
 | 14 | 測試覆蓋率 ≥ 90% | ✅ PLAN | 測試檔案位於 `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`，並於最終驗證階段收集 coverage |
 | 15 | 介面使用政策 | ✅ PASS | 不修改 IConnector、ILogUtility、HRESULT；僅擴充 ILightCurtain |
 | 16 | 檔案建立政策 | ✅ PASS | 使用者 feature 請求隱含核准新增 EventArgs、DioChannelConfig 與測試檔 |

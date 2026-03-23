@@ -48,9 +48,9 @@
 ### Tests for User Story 1
 
 - [ ] T007 [P] [US1] Create test class and constructor injection tests (null-check, valid construction) in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T008 [P] [US1] Add `ReadLightCurtainOSSD` tests: both safe, OSSD1 unsafe, OSSD2 unsafe, both unsafe, mismatched state, DIO read failure, not configured returns `LightCurtainNotConfigured` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T009 [P] [US1] Add `OSSDAlarmTriggered` event tests: safe→unsafe fires alarm, unsafe→safe auto-clears without event, alarm includes correct OSSD values in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T010 [P] [US1] Add `GetLightCurtainDIStatus` tests: OSSD1/OSSD2 success, DO enum returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 1
 
@@ -91,7 +91,7 @@
 
 ### Tests for User Story 3
 
-- [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T019 [P] [US3] Add `SetLightCurtainDOStatus` tests: set each DO channel (Reset/Test/Interlock/LTCLed), invalid channel (OSSD1/OSSD2) returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, disabled mode returns `LightCurtainDisabled`, unsafe state returns `LightCurtainUnsafeState`, DIO write failure returns `LightCurtainDioWriteFailed` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T020 [P] [US3] Add `GetLightCurtainDOStatus` tests: get each DO channel, invalid channel returns `LightCurtainInvalidChannel`, not configured returns `LightCurtainNotConfigured`, DIO read failure returns `LightCurtainDioReadFailed`, hardware value differs from cached value triggers `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T021 [P] [US3] Add `GetLightCurtainStatus` tests: single response returns OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, `LightCurtainType`, and `LightCurtainVoltageMode` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T022 [P] [US3] Add `StatusChanged` event comprehensive tests: fires on DO change, includes all current signal values and modes in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`

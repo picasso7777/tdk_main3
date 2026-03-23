@@ -118,4 +118,5 @@ lightCurtain.GetLightCurtainType(out currentType);
 | `TDKController/Interface/ErrorCode.cs` | 修改（新增 LightCurtain `const int` 錯誤碼）|
 | `TDKController/Config/LightCurtainConfig.cs` | 修改（擴充為完整 Config + DioChannelConfig struct）|
 | `TDKController/Module/LightCurtain.cs` | 修改（完整實作）|
+| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 建立（新增單元測試）|
 | `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 新增（單元測試）|
