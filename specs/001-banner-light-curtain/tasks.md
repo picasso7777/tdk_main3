@@ -22,7 +22,7 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Enums, structs, EventArgs, ErrorCode enum 錨誤碼定義 — 所有 user story 共享的型別基礎
+**Purpose**: Enums, structs, EventArgs, ErrorCode enum 錯誤碼定義 — 所有 user story 共享的型別基礎
 
 - [ ] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
 - [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class (change access modifier from `internal` to `public`) with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`

@@ -40,8 +40,11 @@ var config = new LightCurtainConfig
     LightCurtainVoltageMode = LightCurtainVoltageMode.Voltage24V
 };
 
-// 建立 LightCurtain 實例
-ILightCurtain lightCurtain = new LightCurtain(config, ioBoards, logger);
+// 建立 LightCurtain 實例（建構函式僅注入 IOBoard[] 與 ILogUtility）
+ILightCurtain lightCurtain = new LightCurtain(ioBoards, logger);
+
+// 透過 Config 屬性 setter 於建構後設定組態
+lightCurtain.Config = config;
 ```
 
 ### 訂閱事件
@@ -118,5 +121,6 @@ lightCurtain.GetLightCurtainType(out currentType);
 | `TDKController/Interface/ErrorCode.cs` | 修改（新增 LightCurtain `const int` 錯誤碼）|
 | `TDKController/Config/LightCurtainConfig.cs` | 修改（擴充為完整 Config + DioChannelConfig struct）|
 | `TDKController/Module/LightCurtain.cs` | 修改（完整實作）|
+| `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 新增（單元測試）|
 | `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 建立（新增單元測試）|
 | `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs` | 新增（單元測試）|
