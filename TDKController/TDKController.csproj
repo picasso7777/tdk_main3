@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{62337363-63B5-4DFE-84D9-C5348B3CFD8D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TDKController</RootNamespace>
+    <AssemblyName>TDKController</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Charts.v21.2.Core, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Charts.Core.21.2.4\lib\net452\DevExpress.Charts.v21.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v21.2, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Data.21.2.4\lib\net452\DevExpress.Data.v21.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.DataVisualization.v21.2.Core, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.DataVisualization.Core.21.2.4\lib\net452\DevExpress.DataVisualization.v21.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Pdf.v21.2.Core, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Pdf.Core.21.2.4\lib\net452\DevExpress.Pdf.v21.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Pdf.v21.2.Drawing, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Pdf.Drawing.21.2.4\lib\net452\DevExpress.Pdf.v21.2.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v21.2.Core, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Printing.Core.21.2.4\lib\net452\DevExpress.Printing.v21.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\CarrierIDReaderConfig.cs" />
+    <Compile Include="Config\LoadportActorConfig.cs" />
+    <Compile Include="GUI\ConnectionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\ConnectionPage.Designer.cs">
+      <DependentUpon>ConnectionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportFOUPInfoPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportFOUPInfoPage.Designer.cs">
+      <DependentUpon>LoadportFOUPInfoPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportIndicatorPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportIndicatorPage.Designer.cs">
+      <DependentUpon>LoadportIndicatorPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportMainTestGui.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportMainTestGui.Designer.cs">
+      <DependentUpon>LoadportMainTestGui.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportMapperStatusPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportMapperStatusPage.Designer.cs">
+      <DependentUpon>LoadportMapperStatusPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportStatusPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportStatusPage.Designer.cs">
+      <DependentUpon>LoadportStatusPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\ViewModels\ConnectionPageViewModel.cs" />
+    <Compile Include="GUI\N2NozzleSettingGUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\N2NozzleSettingGUI.Designer.cs">
+      <DependentUpon>N2NozzleSettingGUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\LoadportControllerGUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadPortActorSettingGUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadPortActorSettingGUI.Designer.cs">
+      <DependentUpon>LoadPortActorSettingGUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\N2NozzleGUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ViewModels\LoadportFOUPInfoPageViewModel.cs" />
+    <Compile Include="GUI\ViewModels\LoadportIndicatorPageViewModel.cs" />
+    <Compile Include="GUI\ViewModels\LoadportMapperStatusPageViewModel.cs" />
+    <Compile Include="GUI\ViewModels\LoadportSlotInfoPageViewModel.cs" />
+    <Compile Include="GUI\LoadportSlotInfoPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\LoadportSlotInfoPage.Designer.cs">
+      <DependentUpon>LoadportSlotInfoPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\ViewModels\LoadportStatusPageViewModel.cs" />
+    <Compile Include="Interface\ILoadportActorPage.cs" />
+    <Compile Include="GUI\ViewModels\LoadPortActorConfigGuiViewModel.cs" />
+    <Compile Include="GUI\ViewModels\N2NozzleConfigGuiViewModel.cs" />
+    <Compile Include="GUI\ViewModels\ViewModelBase.cs" />
+    <Compile Include="Interface\ICarrierIDReader.cs" />
+    <Compile Include="Interface\IE84HandShaking.cs" />
+    <Compile Include="Interface\ILightCurtain.cs" />
+    <Compile Include="Interface\ILoadportActor.cs" />
+    <Compile Include="Interface\ILoadportController.cs" />
+    <Compile Include="Interface\IN2Nozzle.cs" />
+    <Compile Include="Interface\ErrorCode.cs" />
+    <Compile Include="Interface\ILoadPortActor.cs" />
+    <Compile Include="Module\CarrierIDReader.cs" />
+    <Compile Include="Module\IDReaderBarcodeReader.cs" />
+    <Compile Include="Module\IDReaderHermesRFID.cs" />
+    <Compile Include="Module\IDReaderOmronASCII.cs" />
+    <Compile Include="Module\IDReaderOmronHex.cs" />
+    <Compile Include="Module\LoadportActor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\ConnectionPage.resx">
+      <DependentUpon>ConnectionPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportFOUPInfoPage.resx">
+      <DependentUpon>LoadportFOUPInfoPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportIndicatorPage.resx">
+      <DependentUpon>LoadportIndicatorPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportMainTestGui.resx">
+      <DependentUpon>LoadportMainTestGui.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportMapperStatusPage.resx">
+      <DependentUpon>LoadportMapperStatusPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportSlotInfoPage.resx">
+      <DependentUpon>LoadportSlotInfoPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadportStatusPage.resx">
+      <DependentUpon>LoadportStatusPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\N2NozzleSettingGUI.resx">
+      <DependentUpon>N2NozzleSettingGUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\LoadPortActorSettingGUI.resx">
+      <DependentUpon>LoadPortActorSettingGUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EFEMDataCenter\EFEMDataCenter.csproj">
+      <Project>{8f394e36-c16e-4bcf-bae7-128ab15cf5b8}</Project>
+      <Name>EFEMDataCenter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TDKLogUtility\TDKLogUtility.csproj">
+      <Project>{B69FDD41-DBE2-4B2C-808D-E218CF89EBDD}</Project>
+      <Name>TDKLogUtility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Communication\Communication.csproj">
+      <Project>{279A0BCC-2EE7-43D6-858F-4A800E995951}</Project>
+      <Name>Communication</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Resources\AxisInputGreen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AxisInputOff.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SignalInputGreenBlink.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
