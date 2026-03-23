@@ -1,113 +1,121 @@
-# Feature Specification: Banner Light Curtain Support
+# 功能規格：Banner 光幕支援
 
-**Feature Branch**: `001-banner-light-curtain`  
-**Created**: 2026-03-23  
-**Status**: Draft  
-**Input**: User description: "請參考此檔案,建立 LightCutrain 模組在 TDKController 底下, 此為Banner Light Curtain"
+**功能分支**：001-banner-light-curtain  
+**建立日期**：2026-03-23  
+**狀態**：草稿  
+**輸入**：使用者需求：「請參考此檔案，建立 LightCurtain 模組於 TDKController 底下，此為 Banner Light Curtain」
 
-## User Scenarios & Testing *(mandatory)*
+## 使用者情境與測試（必要）
 
-### User Story 1 - Detect Unsafe Curtain States (Priority: P1)
+### 使用者故事 1 - 偵測不安全光幕狀態（優先度：P1）
 
-As an equipment controller user, I need the system to recognize when the Banner light curtain becomes unsafe so that wafer transfer or motion logic can stop before continuing in an unsafe condition.
+身為設備控制器使用者，我需要系統能辨識 Banner 光幕何時進入不安全狀態，讓晶圓搬送或運動邏輯能在不安全條件下停止繼續執行。
 
-**Why this priority**: Unsafe-state detection is the primary business value of the feature. Without it, the module does not provide meaningful safety protection.
+**優先原因**：不安全狀態偵測是此功能的主要業務價值。若沒有此能力，模組無法提供實際的安全防護。
 
-**Independent Test**: Can be fully tested by configuring a valid light curtain profile, simulating safe and unsafe input combinations, and verifying that the system reports safe status normally and raises an alarm when protection is violated.
+**獨立測試方式**：可透過建立有效光幕組態、模擬安全與不安全輸入組合，驗證系統在安全時正確回報，並於保護被破壞時發出告警通知。
 
-**Acceptance Scenarios**:
+**驗收情境**：
 
-1. **Given** a configured light curtain in a safe state, **When** the controller reads the safety inputs, **Then** the system reports both safety channels as safe and does not raise an alarm.
-2. **Given** a configured light curtain in a safe state, **When** either safety channel changes to an unsafe state, **Then** the system marks the curtain as unsafe and emits an alarm notification that includes both safety channel states.
-
----
-
-### User Story 2 - Configure Operating Behavior (Priority: P2)
-
-As a field engineer, I need to configure the Banner light curtain's signal mapping, operating mode, and voltage mode so that the controller behaves correctly for the installed hardware.
-
-**Why this priority**: A valid configuration is required before the module can be trusted in production, but it is secondary to detecting unsafe states once configured.
-
-**Independent Test**: Can be fully tested by entering a complete configuration, retrieving it, changing operating modes, and verifying that invalid or incomplete configurations are rejected.
-
-**Acceptance Scenarios**:
-
-1. **Given** a new controller instance with no accepted light curtain configuration, **When** an engineer provides all required signal mappings and selects an operating mode and voltage mode, **Then** the system accepts the configuration and makes it available for later retrieval.
-2. **Given** a light curtain configuration with missing or conflicting signal mappings, **When** an engineer attempts to enable the feature, **Then** the system rejects the configuration and returns a clear failure result.
+1. **Given** 已完成設定且處於安全狀態的光幕，**When** 控制器讀取安全輸入，**Then** 系統必須回報兩個安全通道均為安全，且不得觸發告警。
+2. **Given** 已完成設定且處於安全狀態的光幕，**When** 任一安全通道變為不安全狀態，**Then** 系統必須將光幕標記為不安全，並發出包含兩個安全通道狀態的告警通知。
 
 ---
 
-### User Story 3 - Observe And Control Light Curtain Signals (Priority: P3)
+### 使用者故事 2 - 設定運作行為（優先度：P2）
 
-As a maintenance or host-side consumer, I need to read the current light curtain status and control supported output signals so that I can diagnose behavior and manage the device during permitted operating states.
+身為現場工程師，我需要設定 Banner 光幕的訊號映射、運作模式與電壓模式，讓控制器能依照實際安裝硬體正確運作。
 
-**Why this priority**: Status visibility and controllable outputs improve supportability and diagnostics, but they depend on the core safety and configuration behavior being present first.
+**優先原因**：模組必須先有有效組態才能在正式環境可信使用，但其優先度仍次於已完成組態後的不安全偵測能力。
 
-**Independent Test**: Can be fully tested by requesting a full status snapshot, changing a supported output signal, and confirming that the reported status reflects the new state.
+**獨立測試方式**：可透過輸入完整組態、讀回組態、切換運作模式，並驗證不完整或無效組態會被拒絕。
 
-**Acceptance Scenarios**:
+**驗收情境**：
 
-1. **Given** a configured light curtain, **When** a caller requests a full status snapshot, **Then** the system returns the current values for both safety inputs, all four supported output signals, the operating mode, and the voltage mode in a single response.
-2. **Given** a configured light curtain in a non-disabled mode, **When** a caller sets a supported output signal, **Then** the system updates the signal state and publishes an updated status notification.
+1. **Given** 一個尚未接受有效光幕組態的新控制器實例，**When** 工程師提供所有必要訊號映射並選擇運作模式與電壓模式，**Then** 系統必須接受該組態並可供後續讀回。
+2. **Given** 一份包含缺漏或衝突訊號映射的 Light Curtain 組態，**When** 工程師設定或更新 Config，**Then** 系統必須立即拒絕該組態、回傳清楚的失敗結果，且不得覆蓋既有有效組態。
 
-### Edge Cases
+---
 
-- The configuration references unavailable channels or assigns the same channel to multiple required signals.
-- One safety channel reports safe while the other reports unsafe, creating a mismatched safety state.
-- A caller requests status or output control before a valid configuration has been accepted.
-- The operating mode changes while the light curtain is already in an alarmed or unsafe state.
-- A caller attempts to control outputs while the feature is disabled, unconfigured, or currently unsafe.
+### 使用者故事 3 - 觀察與控制光幕訊號（優先度：P3）
 
-## Requirements *(mandatory)*
+身為維護人員或 Host 端使用者，我需要讀取目前光幕狀態並控制支援的輸出訊號，讓我能在允許的運作條件下診斷行為並管理裝置。
 
-### Functional Requirements
+**優先原因**：狀態可視性與輸出控制有助於支援與診斷，但必須建立在核心安全偵測與組態能力已存在的前提上。
 
-- **FR-001**: The system MUST support a Banner light curtain profile with two safety input channels (DI) and four controllable output signals (DO): `Reset`, `Test`, `Interlock`, and `LTCLed`. `LTCLed` is included in the four DO total and serves as the status indicator output. The module receives an `IOBoard[]` array and an `ILogUtility` instance via constructor injection, and accesses each channel through `DioChannelConfig.DioDeviceID` as the array index.
-- **FR-002**: The system MUST allow callers to define, update, and retrieve the light curtain configuration for each controller instance.
-- **FR-003**: The system MUST validate that all required signal mappings are complete, non-conflicting, and usable before the light curtain can be enabled.
-- **FR-004**: The system MUST support three operating modes: disabled, enabled during transfer only, and enabled at all times.
-- **FR-005**: The system MUST support two voltage modes representing the installed light curtain polarity options and report the currently selected mode.
-- **FR-006**: The system MUST allow callers to read the current logical state of both safety input channels and all supported output signals on demand via explicit method calls, including a dedicated full-status snapshot method that returns both safety inputs, all four DO signals, the operating mode, and the voltage mode in a single response. The module does not contain an internal polling thread; polling responsibility belongs to the caller.
-- **FR-007**: The system MUST treat the light curtain as unsafe when either safety input indicates interruption, fault, or a mismatched safety condition. The unsafe state MUST auto-clear when both safety inputs return to safe values; no explicit reset action is required.
-- **FR-008**: The system MUST generate an alarm notification whenever the light curtain transitions from a safe state to an unsafe state, including the current values of both safety inputs. The alarm condition clears automatically when both OSSD channels report safe.
-- **FR-009**: The system MUST generate a status change notification whenever any reported logical signal, operating mode, or voltage mode changes.
-- **FR-010**: The system MUST allow callers to set and retrieve the supported output signals only when configuration and operating conditions permit the action.
-- **FR-011**: The system MUST return a clear failure result (using `const int` error codes in the `-400..-499` range) when a caller requests an operation that is not allowed because the feature is disabled, unconfigured, or currently unsafe.
-- **FR-012**: The system MUST keep the latest accepted configuration and operating selections available for later readback during the active controller lifecycle.
-- **FR-013**: The system MUST operate as a self-contained module with no dependency on LoadportActor or any loadport workflow state.
+**獨立測試方式**：可透過請求完整狀態快照、變更支援的輸出訊號，並確認回報狀態反映最新結果。
 
-### Key Entities *(include if feature involves data)*
+**驗收情境**：
 
-- **Light Curtain Configuration**: Defines the required signal mappings, selected operating mode, and selected voltage mode for one standalone Banner light curtain instance.
-- **Light Curtain State**: Represents the current logical values of the two safety inputs, the four supported outputs, and the active mode selections used by callers to determine whether the curtain is safe.
-- **Alarm Notification**: Represents a safety event raised when the light curtain transitions into an unsafe state and includes the safety input values that caused the alarm.
-- **Status Change Notification**: Represents the latest reported operating state after any signal, operating mode, or voltage mode change.
-- **Status Snapshot Response**: Represents the full current state returned by the dedicated status method in a single response payload.
+1. **Given** 一個已完成設定的光幕，**When** 呼叫者要求完整狀態快照，**Then** 系統必須在單次回應中回傳兩個安全輸入、四個支援輸出訊號、運作模式與電壓模式的目前值。
+2. **Given** 一個處於非停用模式的已設定光幕，**When** 呼叫者設定某個支援的輸出訊號，**Then** 系統必須更新該訊號狀態並發出更新後的狀態通知。
 
-### Assumptions
+### 邊界情況
 
-- Each Banner light curtain instance is managed independently and has no coupling to LoadportActor or loadport workflows.
-- The transfer-only operating mode is activated and deactivated by an external caller; the module itself does not monitor or depend on loadport status, load/unload commands, or transfer workflow state, and it does not introduce additional DO permission gating beyond the existing disabled, unconfigured, and unsafe checks.
-- Alarm and status notifications are consumed through existing controller-side notification patterns rather than requiring a new standalone user interface.
+- 組態引用不存在的通道，或將同一通道指派給多個必要訊號。
+- 一個安全通道回報安全，另一個回報不安全，形成雙通道不一致狀態。
+- 呼叫者在尚未接受有效組態前請求狀態查詢或輸出控制。
+- 光幕已處於告警或不安全狀態時，運作模式發生變更。
+- 呼叫者在功能停用、尚未完成有效組態，或光幕目前不安全時嘗試控制輸出。
 
-## Clarifications
+## 需求（必要）
+
+### 功能需求
+
+- **FR-001**：系統必須支援 Banner 光幕設定檔，包含兩個安全輸入通道（DI）與四個可控制輸出訊號（DO）：Reset、Test、Interlock、LTCLed。LTCLed 為四個 DO 之一，並作為狀態指示輸出。模組需透過建構函式注入 IOBoard[] 陣列與 ILogUtility 實例，並以 DioChannelConfig.DioDeviceID 作為陣列索引存取各通道。
+- **FR-002**：系統必須允許呼叫者為每個控制器實例定義、更新與讀取光幕組態。
+- **FR-003**：系統必須在接受或更新 Light Curtain 組態時驗證所有必要訊號映射均已完整、互不衝突且可用；若驗證失敗，系統必須拒絕該組態並保留既有有效組態。
+- **FR-004**：系統必須支援三種運作模式：停用、僅於搬送期間啟用、以及持續啟用。
+- **FR-005**：系統必須支援兩種電壓模式，用以表示實際安裝的光幕極性選項，並可回報目前所選模式。
+- **FR-006**：系統必須允許呼叫者透過明確方法呼叫按需讀取兩個安全輸入通道與所有支援輸出訊號的目前邏輯狀態，並提供一個 dedicated full-status snapshot method，在單次回應中回傳兩個安全輸入、四個 DO 訊號、運作模式與電壓模式。模組本身不得包含內部輪詢執行緒；輪詢責任由外部呼叫者負責。
+- **FR-007**：當任一安全輸入表示遮斷、故障，或出現雙通道不一致狀態時，系統必須將光幕視為不安全。當兩個安全輸入都恢復為安全值時，不安全狀態必須自動解除，不需額外手動重設。
+- **FR-008**：當光幕由安全狀態轉為不安全狀態時，系統必須發出告警通知，並包含兩個安全輸入的目前值。當兩個 OSSD 通道皆恢復安全時，告警狀態必須自動清除。
+- **FR-009**：當任何被回報的邏輯訊號、運作模式或電壓模式發生變更時，系統必須發出狀態變更通知。
+- **FR-010**：系統必須僅在組態與運作條件允許的情況下，允許呼叫者設定與讀取支援的輸出訊號。
+- **FR-011**：當呼叫者要求的操作因功能停用、未完成組態，或目前處於不安全狀態而不被允許時，系統必須回傳清楚的失敗結果，並使用 -400..-499 範圍內的 const int 錯誤碼。
+- **FR-012**：系統必須在控制器實例存活期間保留最新一次被接受的組態與運作選項，供後續讀回。
+- **FR-013**：系統必須作為自含式模組運作，不得依賴 LoadportActor 或任何 loadport workflow 狀態。
+
+### 關鍵實體
+
+- **Light Curtain Configuration**：定義單一獨立 Banner 光幕實例所需的訊號映射、運作模式與電壓模式。
+- **Light Curtain State**：表示兩個安全輸入、四個支援輸出，以及目前模式選擇的邏輯值，供呼叫者判斷光幕是否安全。
+- **Alarm Notification**：表示光幕由安全轉為不安全時所發出的安全事件，並包含造成告警的安全輸入值。
+- **Status Change Notification**：表示任一訊號、運作模式或電壓模式變更後的最新狀態。
+- **Status Snapshot Response**：表示 dedicated status method 單次回傳的完整目前狀態，其資料欄位與狀態變更通知共用相同資料形狀。
+
+### 假設
+
+- 每個 Banner 光幕實例皆獨立管理，與 LoadportActor 或 loadport workflow 無耦合。
+- 僅於搬送期間啟用的模式由外部呼叫者負責啟用與停用；模組本身不得監控或依賴 loadport 狀態、load 或 unload 命令，亦不得在既有停用、未完成組態與不安全檢查之外額外加入 DO 權限限制。
+- 告警與狀態通知透過既有 controller 端通知模式被消費，不需新增獨立使用者介面。
+
+## 核准例外
+
+- 本 feature 經使用者核准，允許對 [TDKController/Interface/ILightCurtain.cs](TDKController/Interface/ILightCurtain.cs) 進行最小必要擴充，以新增本功能所需的屬性、方法、事件與相關型別定義。
+- 本 feature 經使用者核准，允許建立本模組唯一單元測試檔，作為 Banner Light Curtain 功能的測試入口。
+- 本核准僅限於 Banner Light Curtain 功能直接相關的成員與測試內容，不包含對 Communication 的 IConnector、TDKLogUtility 的 ILogUtility、HRESULT、其他既有介面、其他模組檔案結構或與本 feature 無關成員的修改。
+
+## 澄清
 
 ### Session 2026-03-23
 
-- Q: When both OSSD safety channels return to safe values, how should the light curtain recover from unsafe state? → A: Auto-clear (no latch). LTCIN reads OSSD state directly; alarm clears when inputs recover.
+- Q: 當兩個 OSSD 安全通道恢復為安全值時，光幕應如何從不安全狀態恢復？ → A: 自動清除，不採鎖存模式。LTCIN 直接讀取 OSSD 狀態；輸入恢復安全時告警條件自動解除。
 - Q: LightCurtain 模組透過什麼方式存取 DIO 訊號？ → A: 注入 IOBoard[] 陣列，透過 DioChannelConfig.DioDeviceID 索引存取對應裝置。
-- Q: OSSD 安全輸入應該如何被讀取？ → A: 被動式，外部呼叫者主動呼叫 ReadLightCurtainOSSD() 讀取，模組不含內部輪詢執行緒。
-- Q: LightCurtain 錯誤碼範圍？ → A: -400..-499（專案規範已預分配）。
-- Q: LightCurtain 是否需要注入 ILogUtility？ → A: 是，構造函式注入 ILogUtility。
+- Q: OSSD 安全輸入應如何被讀取？ → A: 採被動式，由外部呼叫者主動呼叫 ReadLightCurtainOSSD() 讀取，模組不含內部輪詢執行緒。
+- Q: LightCurtain 錯誤碼範圍？ → A: -400..-499，已由專案規範預先分配。
+- Q: LightCurtain 是否需要注入 ILogUtility？ → A: 是，透過建構函式注入 ILogUtility。
 - Q: LightCurtain 的 DO 數量是否包含 LTCLed？ → A: 是，總數固定為 4 個 DO：Reset、Test、Interlock、LTCLed。
-- Q: Host/maintenance 端如何在單次呼叫中取得完整狀態？ → A: 提供 dedicated full-status snapshot method，回傳兩個 OSSD、四個 DO、LightCurtainType、LightCurtainVoltageMode。
+- Q: Host 或 maintenance 端如何在單次呼叫中取得完整狀態？ → A: 提供 dedicated full-status snapshot method，回傳兩個 OSSD、四個 DO、LightCurtainType 與 LightCurtainVoltageMode。
 - Q: transfer-only 模式是否需要額外的 runtime transfer window 權限判定？ → A: 不需要；輸出控制不因 transfer-only 額外受限，僅在 disabled、unconfigured 或 unsafe 時拒絕。
+- Q: 無效 LightCurtain 組態應於何時被拒絕？ → A: 在設定或更新 Config 時立即驗證並拒絕；不得覆蓋既有有效組態。
+- Q: 完整狀態快照是否需要獨立資料模型？ → A: 不需要；status method 可與狀態變更通知共用相同資料形狀。
 
-## Success Criteria *(mandatory)*
+## 成功標準（必要）
 
-### Measurable Outcomes
+### 可量測結果
 
-- **SC-001**: Engineers can complete initial Banner light curtain configuration, validation, and readback in under 5 minutes per light curtain instance.
-- **SC-002**: In acceptance testing, 100% of unsafe conditions caused by a safety-channel interruption or safety-channel mismatch are reported before the next transfer step is allowed to continue.
-- **SC-003**: In scenario-based testing, users can correctly distinguish disabled, transfer-only, and always-enabled behavior in 100% of defined operating-mode scenarios.
-- **SC-004**: In monitored verification runs, users can retrieve the full current light curtain status in a single request for at least 95% of checks.
+- **SC-001**：依 quickstart 驗證流程，工程師可於 5 分鐘內完成單一 Banner 光幕實例的組態設定、組態驗證與組態讀回。
+- **SC-002**：在驗收測試中，所有由安全通道中斷或雙通道狀態不一致造成的不安全狀態，必須於同一次 ReadLightCurtainOSSD 呼叫中被正確辨識並回報，達成 100% 偵測率。
+- **SC-003**：在情境測試中，使用者可於 100% 已定義模式案例中正確區分停用、搬送期間啟用與持續啟用三種運作模式。
+- **SC-004**：在重複狀態查詢驗證中，GetLightCurtainStatus 必須對所有已定義測試案例回傳完整狀態欄位；若採抽樣驗證，成功率不得低於 95%。
