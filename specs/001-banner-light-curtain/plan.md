@@ -35,17 +35,17 @@
 | 8 | 錯誤碼範圍 -400..-499 | ✅ PASS | LightCurtain 使用專案預留的 -400..-499 範圍 |
 | 9 | 單一 .cs 檔案 | ✅ PASS | 模組實作集中於 [TDKController/Module/LightCurtain.cs](TDKController/Module/LightCurtain.cs) |
 | 10 | 禁止未授權類別 | ✅ PASS | 完整狀態快照重用既有狀態資料形狀，不新增額外快照類別 |
-| 11 | 介面使用政策 | ⚠️ CONDITIONAL | [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 已記錄本 feature 對 [TDKController/Interface/ILightCurtain.cs](TDKController/Interface/ILightCurtain.cs) 的核准例外，仍需 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 同步記錄 |
+| 11 | 介面使用政策 | ✅ PASS | [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 與 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 已同步記錄本 feature 對 [TDKController/Interface/ILightCurtain.cs](TDKController/Interface/ILightCurtain.cs) 的核准例外 |
 | 12 | Lambda 使用規則 | ✅ PASS | 設計上不依賴 lambda |
 | 13 | #region 分區 | ✅ PASS | 最終模組將依職責建立語意化分區 |
-| 14 | 核心邏輯覆蓋率至少 90% | ⚠️ CONDITIONAL | 必須於 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 與最終驗證中明確列為通過條件 |
-| 15 | 檔案建立政策 | ⚠️ CONDITIONAL | [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 已記錄單一測試檔核准，仍需 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 同步記錄 |
+| 14 | 核心邏輯覆蓋率至少 90% | ✅ PASS | [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) T029 已明確列為通過條件 |
+| 15 | 檔案建立政策 | ✅ PASS | [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 與 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 已同步記錄單一測試檔核准 |
 | 16 | 分層規則 | ✅ PASS | 模組保持自含，不依賴 LoadportActor 或 loadport workflow 狀態 |
 | 17 | YAGNI | ✅ PASS | 僅實作規格明確要求的能力 |
 | 18 | 文件語言要求 | ✅ PASS | 本計畫文件以繁體中文撰寫 |
 
-**Gate 結果**：⚠️ 有條件通過。  
-本文件已與 [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 對齊，但仍需 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 同步補齊核准例外紀錄與 90% 覆蓋率驗證條件，才可視為完全通過。
+**Gate 結果**：✅ 通過。  
+本文件已與 [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 及 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 完成對齊。
 
 ## 專案結構
 

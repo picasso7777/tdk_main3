@@ -98,7 +98,7 @@ namespace TDKController.Interface
 
 | 輸入 | 條件 | 行為 |
 |------|------|------|
-| 有效 `LightCurtainConfig` | 所有 DioChannelConfig 映射完整、DeviceID 在範圍內、無重複映射 | 接受並儲存組態 |
+| 有效 `LightCurtainConfig` | 所有 DioChannelConfig 映射完整、DeviceID 在範圍內、無重複映射 | 接受並儲存組態；同步更新模組級 `LightCurtainType` 與 `LightCurtainVoltageMode` 屬性；若任一模式值與先前不同，觸發 `StatusChanged` |
 | `null` | — | 拋出 `ArgumentNullException` |
 | 無效映射（缺欄位、DeviceID 超出範圍、重複通道） | FR-003 驗證失敗 | 拋出 `ArgumentException`，附帶失敗原因描述；保留原有組態 |
 
@@ -137,7 +137,7 @@ namespace TDKController.Interface
 
 | 條件 | 回傳 | 副作用 |
 |------|------|--------|
-| 組態有效 | `0` + out status | 回傳目前 OSSD1、OSSD2、Reset、Test、Interlock、LTCLed、LightCurtainType、LightCurtainVoltageMode |
+| 組態有效 | `0` + out status | 回傳模組內部快取值（OSSD1、OSSD2、Reset、Test、Interlock、LTCLed、LightCurtainType、LightCurtainVoltageMode），不觸發硬體 I/O |
 | 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | 不回傳快照 |
 
 ### ReadLightCurtainOSSD
@@ -154,6 +154,8 @@ namespace TDKController.Interface
 |------|------|--------|
 | 有效 enum 值 | `0` | 更新對應屬性；若值變更則觸發 StatusChanged |
 
+**同步規則**：`SetLightCurtainType` / `SetVoltageMode` 僅修改模組級 mode 屬性，不回寫 `LightCurtainConfig` 物件。Config setter 則同步更新模組級 mode 屬性（見上方 Config setter 行為表）。
+
 ## 事件契約
 
 ### OSSDAlarmTriggered
@@ -164,5 +166,5 @@ namespace TDKController.Interface
 
 ### StatusChanged
 
-- **觸發時機**: 任何訊號值、運行模式或電壓模式變更
+- **觸發時機**: 任何訊號值、運作模式或電壓模式變更
 - **資料**: `LightCurtainStatusChangedEventArgs { OSSD1, OSSD2, Reset, Test, Interlock, LTCLed, LightCurtainVoltageMode, LightCurtainType }`

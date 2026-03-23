@@ -19,7 +19,7 @@
 
 ### LightCurtainType
 
-用途：定義光幕運行模式，控制何時啟用安全偵測。
+用途：定義光幕運作模式，控制何時啟用安全偵測。
 
 | 成員 | 值 | 說明 |
 |------|-----|------|
@@ -62,11 +62,13 @@
 | PortID | int | Port 索引（零起始）|
 | Channel_BitIndex | int | Port 內 bit 索引（零起始）|
 
+**設計決策**：`DioDeviceID` 使用 `-1` 作為 sentinel 表示「未設定」。驗證時若任一 `DioChannelConfig` 的 `DioDeviceID < 0`，則視為必要映射缺漏並拒絕組態。
+
 ## Classes
 
 ### LightCurtainConfig
 
-用途：定義一個光幕實例的完整 DIO 通道映射、運行模式與電壓模式。
+用途：定義一個光幕實例的完整 DIO 通道映射、運作模式與電壓模式。
 
 **DO 映射屬性**:
 
@@ -88,12 +90,12 @@
 
 | 屬性 | 型別 | 說明 |
 |------|------|------|
-| LightCurtainType | LightCurtainType | 運行模式 |
+| LightCurtainType | LightCurtainType | 運作模式 |
 | LightCurtainVoltageMode | LightCurtainVoltageMode | 電壓模式 |
 
 **驗證規則** (FR-003):
 - 所有 6 個 DioChannelConfig 的 `DioDeviceID` 必須在 `IOBoard[]` 陣列索引範圍內
-- 所有 required mappings 必須完整提供，不得保留未設定的預設值
+- 所有 required mappings 必須完整提供，不得保留未設定的預設值（`DioDeviceID < 0` 視為未設定）
 - 任兩個 required signals 不得映射到相同的 `(DioDeviceID, PortID, Channel_BitIndex)` 組合，不區分 DI/DO 類型
 
 ### LightCurtainAlarmEventArgs
@@ -109,7 +111,7 @@
 
 ### LightCurtainStatusChangedEventArgs
 
-用途：狀態變更事件資料，任何邏輯訊號、運行模式或電壓模式變更時觸發。此型別同時作為 `GetLightCurtainStatus(...)` 的完整狀態快照資料模型。
+用途：狀態變更事件資料，任何邏輯訊號、運作模式或電壓模式變更時觸發。此型別同時作為 `GetLightCurtainStatus(...)` 的完整狀態快照資料模型。
 
 | 屬性 | 型別 | 說明 |
 |------|------|------|
@@ -120,7 +122,7 @@
 | Interlock | bool | Interlock 輸出狀態 |
 | LTCLed | bool | LTCLed 輸出狀態 |
 | LightCurtainVoltageMode | LightCurtainVoltageMode | 電壓模式 |
-| LightCurtainType | LightCurtainType | 運行模式 |
+| LightCurtainType | LightCurtainType | 運作模式 |
 
 繼承自 `EventArgs`。
 
@@ -148,8 +150,8 @@
 任何以下值變更時觸發 `StatusChanged` 事件：
 - OSSD1, OSSD2（經由 ReadLightCurtainOSSD）
 - Reset, Test, Interlock, LTCLed（經由 SetLightCurtainDOStatus 寫入後，或 GetLightCurtainDOStatus 讀取硬體值與本地快取不同時）
-- LightCurtainType（經由 SetLightCurtainType）
-- LightCurtainVoltageMode（經由 SetVoltageMode）
+- LightCurtainType（經由 SetLightCurtainType 或 Config setter）
+- LightCurtainVoltageMode（經由 SetVoltageMode 或 Config setter）
 
 ### 實體關係
 
