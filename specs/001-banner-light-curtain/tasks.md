@@ -25,7 +25,7 @@
 **Purpose**: Enums, structs, EventArgs, ErrorCode enum 錨誤碼定義 — 所有 user story 共享的型別基礎
 
 - [ ] T001 [P] Define enums `LightCurtainIO`, `LightCurtainType`, `LightCurtainVoltageMode` and EventArgs classes (`LightCurtainAlarmEventArgs`, `LightCurtainStatusChangedEventArgs`) in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
+- [ ] T002 [P] Define `DioChannelConfig` struct and expand `LightCurtainConfig` class (change access modifier from `internal` to `public`) with DO/DI mapping properties and config properties in `TDKController/Config/LightCurtainConfig.cs`
 - [ ] T003 [P] Define LightCurtain `ErrorCode` enum members (`LightCurtainNotConfigured`, `LightCurtainDisabled`, `LightCurtainDioReadFailed`, `LightCurtainDioWriteFailed`, `LightCurtainInvalidChannel`, `LightCurtainUnsafeState`) in `TDKController/Interface/ErrorCode.cs`
 
 ---
@@ -37,10 +37,10 @@
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [ ] T004 Expand `ILightCurtain` with only the feature-approved member signatures required by the contract, including properties, methods, events, and `GetLightCurtainStatus(...)` in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T005 Implement `LightCurtain` constructor with `LightCurtainConfig`, `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`
+- [ ] T005 Implement `LightCurtain` constructor with `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`
 - [ ] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: required mapping completeness, `DioDeviceID` range check against `IOBoard[]` length, and duplicate channel checks across all DI/DO tuples) in `TDKController/Module/LightCurtain.cs`
 
-**Checkpoint**: Foundation ready — `ILightCurtain` fully declared, `LightCurtain` constructable with valid config
+**Checkpoint**: Foundation ready — `ILightCurtain` fully declared, `LightCurtain` constructable; Config set via property setter post-construction
 
 ---
 
@@ -77,7 +77,7 @@
 
 - [ ] T014 [P] [US2] Add `SetLightCurtainType` / `GetLightCurtainType` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 - [ ] T015 [P] [US2] Add `SetVoltageMode` / `GetVoltageMode` tests: set each mode, get returns correct value, `StatusChanged` fires on mode change in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
-- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns injected config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, and rejected invalid config does not overwrite the previously accepted valid config in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
+- [ ] T016 [P] [US2] Add `Config` property tests: config readback returns accepted config, config update propagates, null config setter throws `ArgumentNullException`, invalid config setter throws `ArgumentException` immediately during Config set/update, rejected invalid config does not overwrite the previously accepted valid config, and Config setter that changes `LightCurtainType` or `LightCurtainVoltageMode` fires `StatusChanged` in `AutoTest/TDKController.Tests/Unit/LightCurtainTests.cs`
 
 ### Implementation for User Story 2
 
@@ -223,7 +223,8 @@ T010: GetLightCurtainDIStatus tests
 - All public DIO operation methods (ReadOSSD, GetDI, SetDO, GetDO, GetStatus) must guard with a config-null check at entry and return `LightCurtainNotConfigured` if `Config` has not been set. Mode/voltage setters do not require this guard.
 - FR-007 defines the unsafe state condition and its auto-clear rule (no manual reset); FR-008 defines the alarm event firing on safe→unsafe transition — auto-clear in FR-008 means the alarm condition clears silently (no event fired on unsafe→safe)
 - Changing `LightCurtainType` mode does not affect existing alarm state — alarm is driven solely by OSSD values
-- Constructor parameter order follows T005: `LightCurtainConfig` first, then `IOBoard[]`, then `ILogUtility`
+- Constructor parameter order follows T005: `IOBoard[]` first, then `ILogUtility`. `LightCurtainConfig` is NOT a constructor parameter; it is set via the `Config` property setter post-construction. Before a valid Config is set, the module is in "unconfigured" state and DIO operation methods return `LightCurtainNotConfigured`
+- Config setter delegates to a private `UpdateConfig` method that uses the constructor-injected `IOBoard[]` field length for `DioDeviceID` range validation (FR-003)
 - Error codes in range -400..-406 are defined as `ErrorCode` enum members per constitution allocation
 - Single test file for all LightCurtain tests per constitution's test file consolidation rule
 - Same-file tasks marked `[P]` (e.g., T007–T010, T014–T016, T019–T022) denote logical independence only — they must be written sequentially since they target the same file

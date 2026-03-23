@@ -62,7 +62,7 @@
 
 ### 功能需求
 
-- **FR-001**：系統必須支援 Banner 光幕設定檔，包含兩個安全輸入通道（DI）與四個可控制輸出訊號（DO）：Reset、Test、Interlock、LTCLed。LTCLed 為四個 DO 之一，並作為狀態指示輸出。模組需透過建構函式注入 IOBoard[] 陣列與 ILogUtility 實例，並以 DioChannelConfig.DioDeviceID 作為陣列索引存取各通道。
+- **FR-001**：系統必須支援 Banner 光幕設定檔，包含兩個安全輸入通道（DI）與四個可控制輸出訊號（DO）：Reset、Test、Interlock、LTCLed。LTCLed 為四個 DO 之一，並作為狀態指示輸出。模組需透過建構函式注入 IOBoard[] 陣列與 ILogUtility 實例，並以 DioChannelConfig.DioDeviceID 作為陣列索引存取各通道。LightCurtainConfig 不經建構函式注入，而是透過 Config 屬性 setter 於建構後設定；在首次成功設定 Config 前，模組處於「未組態」狀態，此時 DIO 操作方法應回傳 LightCurtainNotConfigured。
 - **FR-002**：系統必須允許呼叫者為每個控制器實例定義、更新與讀取光幕組態。
 - **FR-003**：系統必須在接受或更新 Light Curtain 組態時驗證所有必要訊號映射均已完整、互不衝突且可用；若驗證失敗，系統必須拒絕該組態並保留既有有效組態。
 - **FR-004**：系統必須支援三種運作模式：停用、僅於搬送期間啟用、以及持續啟用。
@@ -72,7 +72,7 @@
 - **FR-008**：當光幕由安全狀態轉為不安全狀態時，系統必須發出告警通知，並包含兩個安全輸入的目前值。當兩個 OSSD 通道皆恢復安全時，告警狀態必須自動清除。
 - **FR-009**：當任何被回報的邏輯訊號、運作模式或電壓模式發生變更時，系統必須發出狀態變更通知。
 - **FR-010**：系統必須僅在組態與運作條件允許的情況下，允許呼叫者設定與讀取支援的輸出訊號。
-- **FR-011**：當呼叫者要求的操作因功能停用、未完成組態，或目前處於不安全狀態而不被允許時，系統必須回傳清楚的失敗結果，並使用 -400..-499 範圍內的 `ErrorCode` enum 錨誤碼。
+- **FR-011**：當呼叫者要求的操作因功能停用、未完成組態，或目前處於不安全狀態而不被允許時，系統必須回傳清楚的失敗結果，並使用 -400..-499 範圍內的 `ErrorCode` enum 錯誤碼。
 - **FR-012**：系統必須在控制器實例存活期間保留最新一次被接受的組態與運作選項，供後續讀回。
 - **FR-013**：系統必須作為自含式模組運作，不得依賴 LoadportActor 或任何 loadport workflow 狀態。
 
@@ -112,6 +112,9 @@
 - Q: 完整狀態快照是否需要獨立資料模型？ → A: 不需要；status method 可與狀態變更通知共用相同資料形狀。
 - Q: SetLightCurtainType 是否影響既有的告警狀態？ → A: 不影響。SetLightCurtainType 不會變更或清除既有告警狀態；告警純由 OSSD 值驅動。
 - Q: DioChannelConfig.DioDeviceID 的未設定表示方式？ → A: 以負值（如 -1）表示「未設定」。驗證時若任一 DioChannelConfig 的 DioDeviceID < 0，則視為必要映射缺漏並拒絕組態。
+- Q: LightCurtainConfig 是否為建構函式參數？ → A: 否。建構函式僅注入 IOBoard[] 與 ILogUtility。LightCurtainConfig 透過 Config 屬性 setter 於建構後設定。在首次成功設定 Config 前，模組處於「未組態」狀態，DIO 操作方法回傳 LightCurtainNotConfigured。此設計使邊界情況「呼叫者在尚未接受有效組態前請求狀態查詢或輸出控制」可被測試驗證。
+- Q: Config setter 與 SetLightCurtainType / SetVoltageMode 的模式同步語意？ → A: Config setter 為單向同步：設定 Config 時，模組級 LightCurtainType 與 LightCurtainVoltageMode 屬性會同步更新為 Config 中的值；但透過 SetLightCurtainType / SetVoltageMode 設定的值不會回寫 Config 物件。Config 物件為「初始設定來源」，模組級屬性為「運行時真實值」。
+- Q: Config setter 更新模式後是否觸發 StatusChanged？ → A: 是。若 Config setter 造成 LightCurtainType 或 LightCurtainVoltageMode 與先前模組級值不同，則觸發 StatusChanged 事件。
 
 ## 成功標準（必要）
 

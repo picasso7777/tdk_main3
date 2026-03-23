@@ -5,7 +5,7 @@
 
 ## 摘要
 
-於 TDKController 專案內實作 Banner Light Curtain 模組，提供兩組安全輸入通道 OSSD1 與 OSSD2 的讀取、四組可控數位輸出 Reset、Test、Interlock、LTCLed 的設定與讀取、完整狀態快照查詢、三種運作模式、兩種電壓模式，以及安全告警與狀態變更事件通知。模組透過 IOBoard[] 陣列與 ILogUtility 進行建構函式注入，並以 DioChannelConfig 結構描述 DIO 通道映射。
+於 TDKController 專案內實作 Banner Light Curtain 模組，提供兩組安全輸入通道 OSSD1 與 OSSD2 的讀取、四組可控數位輸出 Reset、Test、Interlock、LTCLed 的設定與讀取、完整狀態快照查詢、三種運作模式、兩種電壓模式，以及安全告警與狀態變更事件通知。模組透過 IOBoard[] 陣列與 ILogUtility 進行建構函式注入，LightCurtainConfig 透過 Config 屬性 setter 於建構後設定，並以 DioChannelConfig 結構描述 DIO 通道映射。
 
 ## 技術背景
 
@@ -28,7 +28,7 @@
 | 1 | 命名慣例 | ✅ PASS | 類別、方法與屬性使用 PascalCase，區域變數使用 camelCase |
 | 2 | 組態屬性命名為 Config | ✅ PASS | 光幕組態公開屬性名稱統一為 Config |
 | 3 | 單一職責 | ✅ PASS | LightCurtain 模組僅負責光幕安全 I/O 與狀態管理 |
-| 4 | 建構函式注入與 null 檢查 | ✅ PASS | IOBoard[]、ILogUtility 與組態由建構函式注入並進行驗證 |
+| 4 | 建構函式注入與 null 檢查 | ✅ PASS | IOBoard[] 與 ILogUtility 由建構函式注入並進行 null 驗證；LightCurtainConfig 透過 Config 屬性 setter 於建構後設定，設定前為「未組態」狀態 |
 | 5 | 事件相依性訂閱規則 | ✅ N/A | 本功能不涉及 IConnector 注入與替換 |
 | 6 | IDisposable 模組生命週期 | ⚠️ N/A | 目前規格未要求實作 IDisposable |
 | 7 | 例外處理與日誌 | ✅ PASS | 公開操作須以 try-catch 保護並透過 ILogUtility 記錄 |
@@ -66,7 +66,7 @@
 
 ### 結構決策
 
-所有實作程式碼均放置於既有的 TDKController 專案結構中，不新增專案。完整狀態快照由 GetLightCurtainStatus 方法提供，並與狀態變更通知共用相同資料形狀，以避免為本 feature 額外新增獨立快照類別。單元測試維持單一測試檔策略，放置於既有 AutoTest 單元測試目錄中。任何對介面擴充與新測試檔建立的例外記錄，必須與 [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 及 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 保持一致。
+所有實作程式碼均放置於既有的 TDKController 專案結構中，不新增專案。LightCurtainConfig 不經建構函式注入，而是透過 Config 屬性 setter 於建構後設定；Config setter 委派至私有方法 `UpdateConfig`，該方法使用建構函式注入的 `IOBoard[]` 欄位長度對 DioDeviceID 進行範圍檢查（FR-003）。完整狀態快照由 GetLightCurtainStatus 方法提供，並與狀態變更通知共用相同資料形狀，以避免為本 feature 額外新增獨立快照類別。單元測試維持單一測試檔策略，放置於既有 AutoTest 單元測試目錄中。任何對介面擴充與新測試檔建立的例外記錄，必須與 [specs/001-banner-light-curtain/spec.md](specs/001-banner-light-curtain/spec.md) 及 [specs/001-banner-light-curtain/tasks.md](specs/001-banner-light-curtain/tasks.md) 保持一致。
 
 ## 複雜度追蹤
 
