@@ -37,7 +37,7 @@
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [ ] T004 Expand `ILightCurtain` with only the feature-approved member signatures required by the contract, including properties, methods, events, and `GetLightCurtainStatus(...)` in `TDKController/Interface/ILightCurtain.cs`
-- [ ] T005 Implement `LightCurtain` constructor with `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`
+- [ ] T005 Implement `LightCurtain` constructor with `IOBoard[]`, `ILogUtility` injection, null-checks, field storage, and `#region` skeleton in `TDKController/Module/LightCurtain.cs`; also change class access modifier from `internal` to `public` to satisfy `ILightCurtain` interface visibility
 - [ ] T006 Implement `LightCurtain` read-only IO status properties (`OSSD1`, `OSSD2`, `Reset`, `Test`, `Interlock`, `LTCLed`) and `Config` property with `UpdateConfig` private method (including FR-003 validation: required mapping completeness, `DioDeviceID` range check against `IOBoard[]` length, and duplicate channel checks across all DI/DO tuples) in `TDKController/Module/LightCurtain.cs`
 
 **Checkpoint**: Foundation ready — `ILightCurtain` fully declared, `LightCurtain` constructable; Config set via property setter post-construction
@@ -171,7 +171,7 @@ Within Phase 5 (US3 tests):
 # All three tasks can run in parallel (different files):
 T001: Define enums and EventArgs in ILightCurtain.cs
 T002: Define DioChannelConfig and LightCurtainConfig in LightCurtainConfig.cs
-T003: Define LightCurtain const int error codes in ErrorCode.cs
+T003: Define LightCurtain ErrorCode enum members in ErrorCode.cs
 ```
 
 ## Parallel Example: User Story 1 Tests
