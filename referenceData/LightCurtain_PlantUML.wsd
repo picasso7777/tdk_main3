@@ -1,0 +1,182 @@
+@startuml
+
+' =========================
+' Enum: LightCurtainIO
+' =========================
+enum LightCurtainIO {
+    OSSD1
+    OSSD2
+    Reset
+    Test
+    Interlock
+    LTCLed
+}
+
+' =========================
+' Enum: LightCurtainType
+' =========================
+enum LightCurtainType {
+    Disable
+    Enable_InTransfer
+    Enable_Always
+}
+
+' =========================
+' Enum: LightCurtainVoltageMode
+' =========================
+enum LightCurtainVoltageMode {
+    Voltage24V
+    Voltage0V
+}
+
+' =========================
+' Struct: DioChannelConfig
+' =========================
+class DioChannelConfig <<struct>> {
+    + DioDeviceID : int
+    + PortID : int
+    + Channel_BitIndex : int
+}
+
+' =========================
+' Class: LightCurtainConfig
+' =========================
+class LightCurtainConfig {
+
+    == DO Mapping ==
+    + LTC_DO_Reset : DioChannelConfig
+    + LTC_DO_Test : DioChannelConfig
+    + LTC_DO_Interlock : DioChannelConfig
+    + LTC_DO_LTCLed : DioChannelConfig
+
+    == DI Mapping ==
+    + LTC_DI_OSSD1 : DioChannelConfig
+    + LTC_DI_OSSD2 : DioChannelConfig
+
+    == LTC Config ==
+    + LightCurtainType : LightCurtainType
+    + LightCurtainVoltageMode : LightCurtainVoltageMode
+}
+
+' =========================
+' Class: LightCurtainAlarmEventArgs
+' =========================
+class LightCurtainAlarmEventArgs {
+    + OSSD1 : bool
+    + OSSD2 : bool
+}
+
+' =========================
+' Class: LightCurtainStatusChangedEventArgs
+' =========================
+class LightCurtainStatusChangedEventArgs {
+    + OSSD1 : bool
+    + OSSD2 : bool
+    + Reset : bool
+    + Test : bool
+    + Interlock : bool
+    + LTCLed : bool
+    + LightCurtainVoltageMode : LightCurtainVoltageMode
+    + LightCurtainType : LightCurtainType
+}
+
+' =========================
+' Interface: ILightCurtain
+' =========================
+interface ILightCurtain{
+
+    == Logical IO Status ==
+    + OSSD1 : bool { get; }
+    + OSSD2 : bool { get; }
+    + Reset : bool { get; }
+    + Test : bool { get; }
+    + Interlock : bool { get; }
+    + LTCLed : bool { get; }
+
+    == Properties ==
+    + LightCurtainConfig : LightCurtainConfig { get; set; }
+    + LightCurtainVoltageMode : LightCurtainVoltageMode { get; set; }
+    + LightCurtainType : LightCurtainType { get; set; }
+
+    == Methods ==
+    + SetLightCurtainType(lightCurtainType : LightCurtainType) : ErrorCode
+    + GetLightCurtainType(lightCurtainType : out LightCurtainType) : ErrorCode
+    + SetVoltageMode(lightCurtainVoltageMode : LightCurtainVoltageMode) : ErrorCode
+    + GetVoltageMode(lightCurtainVoltageMode : out LightCurtainVoltageMode) : ErrorCode
+    + ReadLightCurtainOSSD() : ErrorCode
+    + TriggerLightCurtainAlarm() : ErrorCode
+
+    + OSSDAlarmTriggered : EventHandler<LightCurtainAlarmEventArgs>
+    + StatusChanged : EventHandler<LightCurtainStatusChangedEventArgs>
+}
+
+' =========================
+' Class: LightCurtain
+' =========================
+class LightCurtain {
+
+    + OSSD1 : bool { get; }
+    + OSSD2 : bool { get; }
+    + Reset : bool { get; }
+    + Test : bool { get; }
+    + Interlock : bool { get; }
+    + LTCLed : bool { get; }
+
+    + LightCurtainConfig : LightCurtainConfig { get; set; }
+    + LightCurtainVoltageMode : LightCurtainVoltageMode { get; set; }
+    + LightCurtainType : LightCurtainType { get; set; }
+
+    + OSSDAlarmTriggered : EventHandler<LightCurtainAlarmEventArgs>
+    + StatusChanged : EventHandler<LightCurtainStatusChangedEventArgs>
+
+    + LightCurtain(config : LightCurtainConfig, iIOBoard : IOBoard[])
+    - UpdateConfig(config : LightCurtainConfig)
+
+' ========================= DO ===================
+    + SetLightCurtainDOStatus(io : LightCurtainIO, turnOn : bool) : ErrorCode
+' Runtime Usage (.NET 4.7.2)
+' this.iDos[config.LTC_DO_Test.DioDeviceID]
+'     .SetOutputBit(
+'         config.LTC_DO_Test.PortID,
+'         config.LTC_DO_Test.Channel_BitIndex,
+'         turnOn
+'     );
+
+    + GetLightCurtainDOStatus(io : LightCurtainIO, out turnOn : bool) : ErrorCode
+' Runtime Usage
+' this.iDos[config.LTC_DO_Test.DioDeviceID]
+'     .GetDO(
+'         config.LTC_DO_Test.PortID,
+'         config.LTC_DO_Test.Channel_BitIndex,
+'         out turnOn
+'     );
+
+' ========================= DI ===================
+    + GetLightCurtainDIStatus(io : LightCurtainIO, out turnOn : bool) : ErrorCode
+' Runtime Usage
+' switch(io)
+'   case LightCurtainIO.OSSD1:
+'       if(iIOBoard[config.LTC_DI_OSSD1.DioDeviceID] is IVirtualWritableInput)
+'       {
+'           iIOBoard[config.LTC_DI_OSSD1.DioDeviceID]
+'               .PushInputBit(
+'                   config.LTC_DI_OSSD1.PortID,
+'                   config.LTC_DI_OSSD1.Channel_BitIndex,
+'                   turnOn
+'               );
+'           return true;
+'       }
+'       return false;
+}
+
+' =========================
+' Relationships
+' =========================
+LightCurtain ..|> ILightCurtain
+LightCurtain --> LightCurtainConfig
+LightCurtain --> LightCurtainAlarmEventArgs
+LightCurtain --> LightCurtainStatusChangedEventArgs
+LightCurtainConfig *-- DioChannelConfig
+LightCurtain --> LightCurtainIO
+
+@enduml
