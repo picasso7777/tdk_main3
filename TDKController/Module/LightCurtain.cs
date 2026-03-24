@@ -152,14 +152,14 @@ namespace TDKController
         {
             try
             {
-                // Reject undefined enum values to guard against invalid casts (e.g. (LightCurtainType)99).
+                    // Reject undefined enum values.
                 if (!Enum.IsDefined(typeof(LightCurtainType), lightCurtainType))
                 {
                     _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("SetLightCurtainType: invalid mode {0}", lightCurtainType));
                     return ErrorCode.LightCurtainError;
                 }
 
-                // Only fire StatusChanged when the value actually differs (same-value assignment is a no-op).
+                    // Raise StatusChanged only when the type changes.
                 bool changed = _lightCurtainType != lightCurtainType;
                 _lightCurtainType = lightCurtainType;
                 RaiseStatusChangedIfNeeded(changed);
@@ -229,22 +229,19 @@ namespace TDKController
 
         private void UpdateConfig(LightCurtainConfig config)
         {
-            // Step 1: Full validation up front — if any check fails, an ArgumentException propagates
-            // and the previously accepted _config remains untouched (FR-003).
+                // Validate the incoming config before replacing FR-003 state.
             ValidateConfig(config);
 
-            // Step 2: Determine whether the incoming config carries different mode values.
-            // Config setter performs one-way sync: config modes → module-level properties.
-            // SetLightCurtainType/SetVoltageMode never write back to the Config object.
+                // Detect whether config-driven mode values changed.
             bool shouldRaiseStatusChanged = _lightCurtainType != config.LightCurtainType
                 || _lightCurtainVoltageMode != config.LightCurtainVoltageMode;
 
-            // Step 3: Atomically replace config and sync module-level mode fields.
+                // Sync accepted config values into module state.
             _config = config;
             _lightCurtainType = config.LightCurtainType;
             _lightCurtainVoltageMode = config.LightCurtainVoltageMode;
 
-            // Step 4: Notify subscribers only if mode values actually changed.
+                // Raise StatusChanged only when config-driven modes changed.
             RaiseStatusChangedIfNeeded(shouldRaiseStatusChanged);
         }
 
@@ -353,8 +350,7 @@ namespace TDKController
                     return ErrorCode.LightCurtainNotConfigured;
                 }
 
-                // Step 1: Read both OSSD safety channels from DIO hardware.
-                // If either read fails, abort immediately without updating any cached state (fail-fast).
+                // Read both OSSD channels before updating cached state.
                 byte ossd1Value;
                 byte ossd2Value;
                 if (ReadInput(_config.LTC_DI_OSSD[0], out ossd1Value) != ErrorCode.Success)
@@ -367,24 +363,23 @@ namespace TDKController
                     return ErrorCode.LightCurtainDioReadFailed;
                 }
 
-                // Step 2: Convert raw byte values (0/1) to boolean (true = safe).
+                // Convert raw OSSD values to cached booleans.
                 bool currentOssd1 = ConvertToBool(ossd1Value);
                 bool currentOssd2 = ConvertToBool(ossd2Value);
 
-                // Step 3: Capture prior unsafe flag before updating, then refresh cached OSSD properties.
+                // Preserve the prior unsafe state before refreshing cache.
                 bool previousUnsafe = _isUnsafe;
                 bool changed = UpdateCachedInputs(currentOssd1, currentOssd2);
 
-                // Step 4: Evaluate current unsafe state — unsafe if either channel is false (FR-007).
+                // Re-evaluate FR-007 unsafe state from the current OSSD values.
                 bool currentUnsafe = EvaluateUnsafeState(currentOssd1, currentOssd2);
                 _isUnsafe = currentUnsafe;
                 lTCTriggered = currentUnsafe;
 
-                // Step 5: Fire StatusChanged if any cached value changed.
+                // Raise StatusChanged only when cached inputs changed.
                 RaiseStatusChangedIfNeeded(changed);
 
-                // Step 6: Fire alarm only on safe-to-unsafe transition (FR-008).
-                // Unsafe-to-safe recovery clears silently (auto-clear, no event).
+                // Raise the alarm only on the FR-008 safe-to-unsafe transition.
                 if (!previousUnsafe && currentUnsafe)
                 {
                     RaiseAlarmTriggered();
@@ -741,8 +736,7 @@ namespace TDKController
             }
         }
 
-        // Builds a full status snapshot from cached values. Shared by GetLightCurtainStatus
-        // and StatusChanged event to maintain the same data shape (FR-006).
+        // Build a cached status snapshot for FR-006 consumers.
         private LightCurtainStatusChangedEventArgs CreateStatusSnapshot()
         {
             return new LightCurtainStatusChangedEventArgs(
@@ -756,19 +750,13 @@ namespace TDKController
                 _lightCurtainType);
         }
 
-        // Fires OSSDAlarmTriggered with current OSSD values. Uses a local handler copy
-        // to avoid race conditions if a subscriber unsubscribes during invocation.
+        // Raise the current OSSD alarm snapshot.
         private void RaiseAlarmTriggered()
         {
-            EventHandler<LightCurtainAlarmEventArgs> handler = OSSDAlarmTriggered;
-            if (handler != null)
-            {
-                handler(this, new LightCurtainAlarmEventArgs(_ossd1, _ossd2));
-            }
+            OSSDAlarmTriggered?.Invoke(this, new LightCurtainAlarmEventArgs(_ossd1, _ossd2));
         }
 
-        // Fires StatusChanged only when a value actually changed (FR-009).
-        // Uses a local handler copy to prevent race conditions on concurrent unsubscribe.
+        // Raise StatusChanged only when FR-009 detects a state change.
         private void RaiseStatusChangedIfNeeded(bool changed)
         {
             if (!changed)
@@ -776,11 +764,7 @@ namespace TDKController
                 return;
             }
 
-            EventHandler<LightCurtainStatusChangedEventArgs> handler = StatusChanged;
-            if (handler != null)
-            {
-                handler(this, CreateStatusSnapshot());
-            }
+            StatusChanged?.Invoke(this, CreateStatusSnapshot());
         }
 
         #endregion
