@@ -44,14 +44,22 @@ namespace TDKController
         /// Initializes a new instance of the <see cref="LightCurtain"/> class.
         /// </summary>
         /// <param name="ioBoards">Injected DIO boards used by DioDeviceID mappings.</param>
+        /// <param name="config">Injected light curtain configuration applied during construction.</param>
         /// <param name="logger">Injected logger for diagnostics and exception reporting.</param>
-        /// <exception cref="ArgumentNullException">Thrown when ioBoards or logger is null.</exception>
-        public LightCurtain(IOBoard[] ioBoards, ILogUtility logger)
+        /// <exception cref="ArgumentNullException">Thrown when ioBoards, config, or logger is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when config is invalid.</exception>
+        public LightCurtain(IOBoard[] ioBoards, LightCurtainConfig config, ILogUtility logger)
         {
             _ioBoards = ioBoards ?? throw new ArgumentNullException(nameof(ioBoards));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _lightCurtainType = LightCurtainType.Disable;
             _lightCurtainVoltageMode = LightCurtainVoltageMode.Voltage24V;
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            UpdateConfig(config);
         }
 
         #endregion

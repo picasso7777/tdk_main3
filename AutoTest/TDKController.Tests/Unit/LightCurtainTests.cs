@@ -51,7 +51,7 @@ namespace TDKController.Tests.Unit
             };
 
             _validConfig = CreateValidConfig();
-            _sut = new LightCurtain(_ioBoards, _logger.Object);
+            _sut = new LightCurtain(_ioBoards, _validConfig, _logger.Object);
         }
 
         #region Constructor Tests
@@ -59,19 +59,25 @@ namespace TDKController.Tests.Unit
         [Test]
         public void Constructor_NullIoBoards_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new LightCurtain(null, _logger.Object));
+            Assert.Throws<ArgumentNullException>(() => new LightCurtain(null, _validConfig, _logger.Object));
+        }
+
+        [Test]
+        public void Constructor_NullConfig_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new LightCurtain(_ioBoards, null, _logger.Object));
         }
 
         [Test]
         public void Constructor_NullLogger_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new LightCurtain(_ioBoards, null));
+            Assert.Throws<ArgumentNullException>(() => new LightCurtain(_ioBoards, _validConfig, null));
         }
 
         [Test]
         public void Constructor_ValidDependencies_CreatesInstance()
         {
-            Assert.DoesNotThrow(() => new LightCurtain(_ioBoards, _logger.Object));
+            Assert.DoesNotThrow(() => new LightCurtain(_ioBoards, _validConfig, _logger.Object));
         }
 
         #endregion
@@ -166,13 +172,11 @@ namespace TDKController.Tests.Unit
         }
 
         [Test]
-        public void ReadLightCurtainOSSD_NotConfigured_ReturnsNotConfigured()
+        public void Constructor_InvalidConfig_ThrowsArgumentException()
         {
-            bool triggered;
-            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
+            LightCurtainConfig invalidConfig = new LightCurtainConfig();
 
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
-            Assert.IsFalse(triggered);
+            Assert.Throws<ArgumentException>(() => new LightCurtain(_ioBoards, invalidConfig, _logger.Object));
         }
 
         [Test]
@@ -281,15 +285,6 @@ namespace TDKController.Tests.Unit
             ErrorCode result = _sut.GetLightCurtainDIStatus(LightCurtainIO.Reset, out value);
 
             Assert.AreEqual(ErrorCode.LightCurtainInvalidChannel, result);
-        }
-
-        [Test]
-        public void GetLightCurtainDIStatus_NotConfigured_ReturnsNotConfigured()
-        {
-            bool value;
-            ErrorCode result = _sut.GetLightCurtainDIStatus(LightCurtainIO.OSSD1, out value);
-
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
         }
 
         [Test]
@@ -499,14 +494,6 @@ namespace TDKController.Tests.Unit
         }
 
         [Test]
-        public void SetLightCurtainDOStatus_NotConfigured_ReturnsNotConfigured()
-        {
-            ErrorCode result = _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true);
-
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
-        }
-
-        [Test]
         public void SetLightCurtainDOStatus_Disabled_ReturnsDisabled()
         {
             ConfigureSut(_validConfig);
@@ -570,15 +557,6 @@ namespace TDKController.Tests.Unit
         }
 
         [Test]
-        public void GetLightCurtainDOStatus_NotConfigured_ReturnsNotConfigured()
-        {
-            bool value;
-            ErrorCode result = _sut.GetLightCurtainDOStatus(LightCurtainIO.Reset, out value);
-
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
-        }
-
-        [Test]
         public void GetLightCurtainDOStatus_DioReadFailure_ReturnsReadFailed()
         {
             ConfigureSut(_validConfig);
@@ -630,16 +608,6 @@ namespace TDKController.Tests.Unit
         }
 
         [Test]
-        public void GetLightCurtainStatus_NotConfigured_ReturnsNotConfigured()
-        {
-            LightCurtainStatusChangedEventArgs status;
-            ErrorCode result = _sut.GetLightCurtainStatus(out status);
-
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
-            Assert.IsNull(status);
-        }
-
-        [Test]
         public void StatusChanged_DoChange_IncludesAllCurrentValuesAndModes()
         {
             ConfigureForSafeOutputOperations();
@@ -667,20 +635,6 @@ namespace TDKController.Tests.Unit
         #endregion
 
         #region Edge Case Tests
-
-        [Test]
-        public void Operations_BeforeValidConfig_ReturnExpectedErrors()
-        {
-            bool value;
-            LightCurtainStatusChangedEventArgs status;
-            bool triggered;
-
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.ReadLightCurtainOSSD(out triggered));
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.GetLightCurtainDIStatus(LightCurtainIO.OSSD1, out value));
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.GetLightCurtainDOStatus(LightCurtainIO.Reset, out value));
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.GetLightCurtainStatus(out status));
-        }
 
         [Test]
         public void SetLightCurtainType_WhileAlarmed_DoesNotClearUnsafeState()
@@ -729,9 +683,8 @@ namespace TDKController.Tests.Unit
                 null,
                 _boardMocks[2].Object,
             };
-            LightCurtain sut = new LightCurtain(boardsWithNull, _logger.Object);
 
-            Assert.Throws<ArgumentException>(() => sut.Config = _validConfig);
+            Assert.Throws<ArgumentException>(() => new LightCurtain(boardsWithNull, _validConfig, _logger.Object));
         }
 
         #endregion
