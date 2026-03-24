@@ -878,7 +878,7 @@ namespace TDKController.Tests.Unit
 
         private string GetKey(DioChannelConfig channelConfig)
         {
-            return GetKey(channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.Channel_BitIndex);
+            return GetKey(channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.BitIndex);
         }
 
         private static string GetKey(int dioDeviceId, int portId, int bitIndex)
