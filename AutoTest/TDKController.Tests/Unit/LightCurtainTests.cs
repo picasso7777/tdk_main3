@@ -383,6 +383,44 @@ namespace TDKController.Tests.Unit
             Assert.AreEqual(LightCurtainVoltageMode.Voltage24V, _sut.LightCurtainVoltageMode);
         }
 
+        [Test]
+        public void SetLightCurtainType_SameValue_DoesNotRaiseStatusChanged()
+        {
+            Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainType(LightCurtainType.Enable_Always));
+            int eventCount = 0;
+            _sut.StatusChanged += delegate { eventCount++; };
+
+            Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainType(LightCurtainType.Enable_Always));
+
+            Assert.AreEqual(0, eventCount);
+        }
+
+        [Test]
+        public void SetVoltageMode_SameValue_DoesNotRaiseStatusChanged()
+        {
+            Assert.AreEqual(ErrorCode.Success, _sut.SetVoltageMode(LightCurtainVoltageMode.Voltage0V));
+            int eventCount = 0;
+            _sut.StatusChanged += delegate { eventCount++; };
+
+            Assert.AreEqual(ErrorCode.Success, _sut.SetVoltageMode(LightCurtainVoltageMode.Voltage0V));
+
+            Assert.AreEqual(0, eventCount);
+        }
+
+        [Test]
+        public void Config_Setter_SameModes_DoesNotRaiseStatusChanged()
+        {
+            LightCurtainConfig config = CreateValidConfig();
+            config.LightCurtainType = LightCurtainType.Disable;
+            config.LightCurtainVoltageMode = LightCurtainVoltageMode.Voltage24V;
+            int eventCount = 0;
+            _sut.StatusChanged += delegate { eventCount++; };
+
+            _sut.Config = config;
+
+            Assert.AreEqual(0, eventCount);
+        }
+
         #endregion
 
         #region DO And Snapshot Tests
