@@ -12,6 +12,9 @@ namespace TDKController.Interface
     {
         #region Logical IO Status (read-only properties)
 
+        /// <summary>Safety channel array. Index 0 = OSSD1, index 1 = OSSD2.</summary>
+        bool[] OSSD { get; }
+
         /// <summary>Safety channel 1 status. True = safe.</summary>
         bool OSSD1 { get; }
 
@@ -63,7 +66,10 @@ namespace TDKController.Interface
         /// Reads OSSD safety inputs from DIO hardware.
         /// Updates OSSD1/OSSD2 properties and triggers alarm/status events if changed.
         /// </summary>
-        ErrorCode ReadLightCurtainOSSD();
+        ErrorCode ReadLightCurtainOSSD(out bool lTCTriggered);
+
+        /// <summary>Manually raises the current OSSD alarm event using cached values.</summary>
+        ErrorCode TriggerLightCurtainAlarm();
 
         /// <summary>Gets a single-response snapshot of the current light curtain state.</summary>
         ErrorCode GetLightCurtainStatus(out LightCurtainStatusChangedEventArgs status);
@@ -101,6 +107,12 @@ namespace TDKController.Interface
 | 有效 `LightCurtainConfig` | 所有 DioChannelConfig 映射完整、DeviceID 在範圍內、無重複映射 | 接受並儲存組態；同步更新模組級 `LightCurtainType` 與 `LightCurtainVoltageMode` 屬性；若任一模式值與先前不同，觸發 `StatusChanged` |
 | `null` | — | 拋出 `ArgumentNullException` |
 | 無效映射（缺欄位、DeviceID 超出範圍、重複通道） | FR-003 驗證失敗 | 拋出 `ArgumentException`，附帶失敗原因描述；保留原有組態 |
+
+### OSSD / Dio Mapping
+
+- `OSSD[0]` 對應 `OSSD1`
+- `OSSD[1]` 對應 `OSSD2`
+- `LTC_DI_OSSD` 必須存在且固定包含 2 個 `DioChannelConfig`
 
 ## 方法行為契約
 
@@ -144,9 +156,16 @@ namespace TDKController.Interface
 
 | 條件 | 回傳 | 副作用 |
 |------|------|--------|
-| 組態有效，兩通道讀取成功 | `ErrorCode.Success` | 更新 OSSD1/OSSD2 屬性；若狀態變更則觸發 StatusChanged；若從安全→不安全則觸發 OSSDAlarmTriggered |
-| 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | 不更新狀態 |
-| DIO 讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` | 不更新狀態 |
+| 組態有效，兩通道讀取成功 | `ErrorCode.Success` + `out lTCTriggered` | 更新 `OSSD`、`OSSD1`、`OSSD2` 屬性；若狀態變更則觸發 StatusChanged；若從安全→不安全則觸發 OSSDAlarmTriggered；當前狀態為 unsafe 時 `lTCTriggered = true` |
+| 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` + `out false` | 不更新狀態 |
+| DIO 讀取失敗 | `ErrorCode.LightCurtainDioReadFailed` + `out false` | 不更新狀態 |
+
+### TriggerLightCurtainAlarm
+
+| 條件 | 回傳 | 副作用 |
+|------|------|--------|
+| 組態有效 | `ErrorCode.Success` | 以目前快取的 `OSSD1` / `OSSD2` 值觸發 `OSSDAlarmTriggered` |
+| 尚未設定有效組態 | `ErrorCode.LightCurtainNotConfigured` | 不觸發事件 |
 
 ### SetLightCurtainType / SetVoltageMode
 

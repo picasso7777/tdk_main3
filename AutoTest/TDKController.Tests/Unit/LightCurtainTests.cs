@@ -82,12 +82,16 @@ namespace TDKController.Tests.Unit
         public void ReadLightCurtainOSSD_BothSafe_ReturnsSuccessAndUpdatesCachedState()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
 
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            bool triggered;
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsFalse(triggered);
+            Assert.IsTrue(_sut.OSSD[0]);
+            Assert.IsTrue(_sut.OSSD[1]);
             Assert.IsTrue(_sut.OSSD1);
             Assert.IsTrue(_sut.OSSD2);
         }
@@ -96,12 +100,14 @@ namespace TDKController.Tests.Unit
         public void ReadLightCurtainOSSD_Ossd1Unsafe_ReturnsSuccessAndMarksUnsafe()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, false);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
 
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            bool triggered;
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsTrue(triggered);
             Assert.IsFalse(_sut.OSSD1);
             Assert.IsTrue(_sut.OSSD2);
             Assert.AreEqual(ErrorCode.LightCurtainUnsafeState, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
@@ -111,12 +117,14 @@ namespace TDKController.Tests.Unit
         public void ReadLightCurtainOSSD_Ossd2Unsafe_ReturnsSuccessAndMarksUnsafe()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
 
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            bool triggered;
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsTrue(triggered);
             Assert.IsTrue(_sut.OSSD1);
             Assert.IsFalse(_sut.OSSD2);
             Assert.AreEqual(ErrorCode.LightCurtainUnsafeState, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
@@ -126,12 +134,14 @@ namespace TDKController.Tests.Unit
         public void ReadLightCurtainOSSD_BothUnsafe_ReturnsSuccessAndUpdatesCachedState()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, false);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
 
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            bool triggered;
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsTrue(triggered);
             Assert.IsFalse(_sut.OSSD1);
             Assert.IsFalse(_sut.OSSD2);
         }
@@ -140,15 +150,17 @@ namespace TDKController.Tests.Unit
         public void ReadLightCurtainOSSD_DioReadFailure_ReturnsReadFailedAndPreservesCachedState()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
-            MarkInputFailure(_validConfig.LTC_DI_OSSD2);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
+            MarkInputFailure(_validConfig.LTC_DI_OSSD[1]);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
 
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.LightCurtainDioReadFailed, result);
+            Assert.IsFalse(triggered);
             Assert.IsTrue(_sut.OSSD1);
             Assert.IsTrue(_sut.OSSD2);
         }
@@ -156,18 +168,21 @@ namespace TDKController.Tests.Unit
         [Test]
         public void ReadLightCurtainOSSD_NotConfigured_ReturnsNotConfigured()
         {
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            bool triggered;
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, result);
+            Assert.IsFalse(triggered);
         }
 
         [Test]
         public void ReadLightCurtainOSSD_SafeToUnsafe_FiresAlarmWithCurrentValues()
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
 
             LightCurtainAlarmEventArgs alarmArgs = null;
             int eventCount = 0;
@@ -177,11 +192,12 @@ namespace TDKController.Tests.Unit
                 alarmArgs = args;
             };
 
-            SetInputValue(_validConfig.LTC_DI_OSSD1, false);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
 
             Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsTrue(triggered);
             Assert.AreEqual(1, eventCount);
             Assert.NotNull(alarmArgs);
             Assert.IsFalse(alarmArgs.OSSD1);
@@ -193,20 +209,48 @@ namespace TDKController.Tests.Unit
         {
             ConfigureSut(_validConfig);
             Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainType(LightCurtainType.Enable_Always));
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
 
             int eventCount = 0;
             _sut.OSSDAlarmTriggered += delegate { eventCount++; };
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
 
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
-            ErrorCode result = _sut.ReadLightCurtainOSSD();
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            ErrorCode result = _sut.ReadLightCurtainOSSD(out triggered);
+
+            Assert.AreEqual(ErrorCode.Success, result);
+            Assert.IsFalse(triggered);
+            Assert.AreEqual(1, eventCount);
+            Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
+        }
+
+        [Test]
+        public void TriggerLightCurtainAlarm_Configured_RaisesAlarmWithCachedValues()
+        {
+            ConfigureSut(_validConfig);
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
+
+            LightCurtainAlarmEventArgs alarmArgs = null;
+            int eventCount = 0;
+            _sut.OSSDAlarmTriggered += delegate(object sender, LightCurtainAlarmEventArgs args)
+            {
+                eventCount++;
+                alarmArgs = args;
+            };
+
+            ErrorCode result = _sut.TriggerLightCurtainAlarm();
 
             Assert.AreEqual(ErrorCode.Success, result);
             Assert.AreEqual(1, eventCount);
-            Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
+            Assert.NotNull(alarmArgs);
+            Assert.IsFalse(alarmArgs.OSSD1);
+            Assert.IsTrue(alarmArgs.OSSD2);
         }
 
         #endregion
@@ -218,8 +262,8 @@ namespace TDKController.Tests.Unit
         public void GetLightCurtainDIStatus_OssdChannels_ReturnsCurrentValue(LightCurtainIO io, bool expectedValue)
         {
             ConfigureSut(_validConfig);
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
 
             bool value;
             ErrorCode result = _sut.GetLightCurtainDIStatus(io, out value);
@@ -252,7 +296,7 @@ namespace TDKController.Tests.Unit
         public void GetLightCurtainDIStatus_DioReadFailure_ReturnsReadFailed()
         {
             ConfigureSut(_validConfig);
-            MarkInputFailure(_validConfig.LTC_DI_OSSD1);
+            MarkInputFailure(_validConfig.LTC_DI_OSSD[0]);
 
             bool value;
             ErrorCode result = _sut.GetLightCurtainDIStatus(LightCurtainIO.OSSD1, out value);
@@ -266,7 +310,7 @@ namespace TDKController.Tests.Unit
             LightCurtainConfig disabledConfig = CreateValidConfig();
             disabledConfig.LightCurtainType = LightCurtainType.Disable;
             ConfigureSut(disabledConfig);
-            SetInputValue(disabledConfig.LTC_DI_OSSD1, true);
+            SetInputValue(disabledConfig.LTC_DI_OSSD[0], true);
 
             bool value;
             ErrorCode result = _sut.GetLightCurtainDIStatus(LightCurtainIO.OSSD1, out value);
@@ -477,9 +521,10 @@ namespace TDKController.Tests.Unit
         {
             ConfigureSut(_validConfig);
             Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainType(LightCurtainType.Enable_Always));
-            SetInputValue(_validConfig.LTC_DI_OSSD1, true);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, false);
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], true);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], false);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
 
             ErrorCode result = _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true);
 
@@ -628,8 +673,9 @@ namespace TDKController.Tests.Unit
         {
             bool value;
             LightCurtainStatusChangedEventArgs status;
+            bool triggered;
 
-            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.ReadLightCurtainOSSD());
+            Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.ReadLightCurtainOSSD(out triggered));
             Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.GetLightCurtainDIStatus(LightCurtainIO.OSSD1, out value));
             Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.GetLightCurtainDOStatus(LightCurtainIO.Reset, out value));
             Assert.AreEqual(ErrorCode.LightCurtainNotConfigured, _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true));
@@ -641,9 +687,10 @@ namespace TDKController.Tests.Unit
         {
             ConfigureSut(_validConfig);
             Assert.AreEqual(ErrorCode.Success, _sut.SetLightCurtainType(LightCurtainType.Enable_Always));
-            SetInputValue(_validConfig.LTC_DI_OSSD1, false);
-            SetInputValue(_validConfig.LTC_DI_OSSD2, true);
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
+            bool triggered;
+            SetInputValue(_validConfig.LTC_DI_OSSD[0], false);
+            SetInputValue(_validConfig.LTC_DI_OSSD[1], true);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
 
             ErrorCode modeResult = _sut.SetLightCurtainType(LightCurtainType.Enable_InTransfer);
             ErrorCode outputResult = _sut.SetLightCurtainDOStatus(LightCurtainIO.Reset, true);
@@ -658,7 +705,7 @@ namespace TDKController.Tests.Unit
         public void Config_Setter_MissingMappings_ThrowsArgumentException()
         {
             LightCurtainConfig invalidConfig = new LightCurtainConfig();
-            invalidConfig.LTC_DI_OSSD1 = _validConfig.LTC_DI_OSSD1;
+            invalidConfig.LTC_DI_OSSD[0] = _validConfig.LTC_DI_OSSD[0];
             invalidConfig.LightCurtainType = LightCurtainType.Enable_Always;
 
             Assert.Throws<ArgumentException>(() => _sut.Config = invalidConfig);
@@ -668,7 +715,7 @@ namespace TDKController.Tests.Unit
         public void Config_Setter_DuplicateMappings_ThrowsArgumentException()
         {
             LightCurtainConfig invalidConfig = CreateValidConfig();
-            invalidConfig.LTC_DI_OSSD2 = invalidConfig.LTC_DI_OSSD1;
+            invalidConfig.LTC_DI_OSSD[1] = invalidConfig.LTC_DI_OSSD[0];
 
             Assert.Throws<ArgumentException>(() => _sut.Config = invalidConfig);
         }
@@ -758,8 +805,11 @@ namespace TDKController.Tests.Unit
         {
             return new LightCurtainConfig
             {
-                LTC_DI_OSSD1 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
-                LTC_DI_OSSD2 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
+                LTC_DI_OSSD = new[]
+                {
+                    new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
+                    new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
+                },
                 LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 0 },
                 LTC_DO_Test = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 1 },
                 LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 2 },
@@ -780,9 +830,10 @@ namespace TDKController.Tests.Unit
             config.LightCurtainType = LightCurtainType.Enable_Always;
             ConfigureSut(config);
             _validConfig = config;
-            SetInputValue(config.LTC_DI_OSSD1, true);
-            SetInputValue(config.LTC_DI_OSSD2, true);
-            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD());
+            bool triggered;
+            SetInputValue(config.LTC_DI_OSSD[0], true);
+            SetInputValue(config.LTC_DI_OSSD[1], true);
+            Assert.AreEqual(ErrorCode.Success, _sut.ReadLightCurtainOSSD(out triggered));
         }
 
         private void SetInputValue(DioChannelConfig channelConfig, bool value)

@@ -33,8 +33,11 @@ namespace TDKController
         /// </summary>
         public LightCurtainConfig()
         {
-            LTC_DI_OSSD1 = CreateUnconfiguredChannel();
-            LTC_DI_OSSD2 = CreateUnconfiguredChannel();
+            LTC_DI_OSSD = new[]
+            {
+                CreateUnconfiguredChannel(),
+                CreateUnconfiguredChannel(),
+            };
             LTC_DO_Reset = CreateUnconfiguredChannel();
             LTC_DO_Test = CreateUnconfiguredChannel();
             LTC_DO_Interlock = CreateUnconfiguredChannel();
@@ -44,14 +47,10 @@ namespace TDKController
         }
 
         /// <summary>
-        /// Gets or sets the OSSD1 digital input mapping.
+        /// Gets or sets the OSSD digital input mappings.
+        /// Index 0 = OSSD1, index 1 = OSSD2.
         /// </summary>
-        public DioChannelConfig LTC_DI_OSSD1 { get; set; }
-
-        /// <summary>
-        /// Gets or sets the OSSD2 digital input mapping.
-        /// </summary>
-        public DioChannelConfig LTC_DI_OSSD2 { get; set; }
+        public DioChannelConfig[] LTC_DI_OSSD { get; set; }
 
         /// <summary>
         /// Gets or sets the Reset digital output mapping.

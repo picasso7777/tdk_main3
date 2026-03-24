@@ -139,6 +139,12 @@ namespace TDKController
         #region Logical IO Status
 
         /// <summary>
+        /// Gets the latest cached OSSD status array.
+        /// Index 0 = OSSD1, index 1 = OSSD2.
+        /// </summary>
+        bool[] OSSD { get; }
+
+        /// <summary>
         /// Gets the latest cached OSSD1 status. True means safe.
         /// </summary>
         bool OSSD1 { get; }
@@ -224,8 +230,15 @@ namespace TDKController
         /// <summary>
         /// Reads both OSSD channels from hardware and updates the cached safety state.
         /// </summary>
+        /// <param name="lTCTriggered">True when the current read result is unsafe; otherwise false.</param>
         /// <returns>The operation result.</returns>
-        ErrorCode ReadLightCurtainOSSD();
+        ErrorCode ReadLightCurtainOSSD(out bool lTCTriggered);
+
+        /// <summary>
+        /// Manually raises the current OSSD alarm event using cached OSSD values.
+        /// </summary>
+        /// <returns>The operation result.</returns>
+        ErrorCode TriggerLightCurtainAlarm();
 
         /// <summary>
         /// Returns a full light curtain status snapshot using cached values only.

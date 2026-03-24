@@ -50,34 +50,11 @@ class LightCurtainConfig {
     + LTC_DO_LTCLed : DioChannelConfig
 
     == DI Mapping ==
-    + LTC_DI_OSSD1 : DioChannelConfig
-    + LTC_DI_OSSD2 : DioChannelConfig
+    + LTC_DI_OSSD : DioChannelConfig[]
 
     == LTC Config ==
     + LightCurtainType : LightCurtainType
     + LightCurtainVoltageMode : LightCurtainVoltageMode
-}
-
-' =========================
-' Class: LightCurtainAlarmEventArgs
-' =========================
-class LightCurtainAlarmEventArgs {
-    + OSSD1 : bool
-    + OSSD2 : bool
-}
-
-' =========================
-' Class: LightCurtainStatusChangedEventArgs
-' =========================
-class LightCurtainStatusChangedEventArgs {
-    + OSSD1 : bool
-    + OSSD2 : bool
-    + Reset : bool
-    + Test : bool
-    + Interlock : bool
-    + LTCLed : bool
-    + LightCurtainVoltageMode : LightCurtainVoltageMode
-    + LightCurtainType : LightCurtainType
 }
 
 ' =========================
@@ -86,8 +63,7 @@ class LightCurtainStatusChangedEventArgs {
 interface ILightCurtain{
 
     == Logical IO Status ==
-    + OSSD1 : bool { get; }
-    + OSSD2 : bool { get; }
+    + OSSD : bool[] { get; }
     + Reset : bool { get; }
     + Test : bool { get; }
     + Interlock : bool { get; }
@@ -100,14 +76,11 @@ interface ILightCurtain{
 
     == Methods ==
     + SetLightCurtainType(lightCurtainType : LightCurtainType) : ErrorCode
-    + GetLightCurtainType(lightCurtainType : out LightCurtainType) : ErrorCode
     + SetVoltageMode(lightCurtainVoltageMode : LightCurtainVoltageMode) : ErrorCode
-    + GetVoltageMode(lightCurtainVoltageMode : out LightCurtainVoltageMode) : ErrorCode
-    + ReadLightCurtainOSSD() : ErrorCode
+    + ReadLightCurtainOSSD(lTCTriggered: out bool) : ErrorCode
     + TriggerLightCurtainAlarm() : ErrorCode
 
-    + OSSDAlarmTriggered : EventHandler<LightCurtainAlarmEventArgs>
-    + StatusChanged : EventHandler<LightCurtainStatusChangedEventArgs>
+    + LightCurtainChanged : EventHandler
 }
 
 ' =========================
@@ -125,9 +98,6 @@ class LightCurtain {
     + LightCurtainConfig : LightCurtainConfig { get; set; }
     + LightCurtainVoltageMode : LightCurtainVoltageMode { get; set; }
     + LightCurtainType : LightCurtainType { get; set; }
-
-    + OSSDAlarmTriggered : EventHandler<LightCurtainAlarmEventArgs>
-    + StatusChanged : EventHandler<LightCurtainStatusChangedEventArgs>
 
     + LightCurtain(config : LightCurtainConfig, iIOBoard : IOBoard[])
     - UpdateConfig(config : LightCurtainConfig)
@@ -174,8 +144,6 @@ class LightCurtain {
 ' =========================
 LightCurtain ..|> ILightCurtain
 LightCurtain --> LightCurtainConfig
-LightCurtain --> LightCurtainAlarmEventArgs
-LightCurtain --> LightCurtainStatusChangedEventArgs
 LightCurtainConfig *-- DioChannelConfig
 LightCurtain --> LightCurtainIO
 

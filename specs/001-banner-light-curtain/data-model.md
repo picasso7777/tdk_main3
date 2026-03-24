@@ -83,8 +83,7 @@
 
 | 屬性 | 型別 | 說明 |
 |------|------|------|
-| LTC_DI_OSSD1 | DioChannelConfig | OSSD1 安全通道的 DIO 通道映射 |
-| LTC_DI_OSSD2 | DioChannelConfig | OSSD2 安全通道的 DIO 通道映射 |
+| LTC_DI_OSSD | DioChannelConfig[] | OSSD 安全通道的 DIO 通道映射陣列，index 0 = OSSD1，index 1 = OSSD2 |
 
 **組態屬性**:
 

@@ -29,10 +29,12 @@ namespace TDKController
         private bool _test;
         private bool _interlock;
         private bool _ltcLed;
-        // _isUnsafe tracks whether the most recent ReadLightCurtainOSSD() detected an unsafe condition.
+        // _isUnsafe tracks whether the most recent ReadLightCurtainOSSD(out bool lTCTriggered)
+        // detected an unsafe condition.
         // It defaults to false even though _ossd1/_ossd2 also default to false (which would indicate unsafe).
-        // This is intentional: before the first successful ReadLightCurtainOSSD() call, the module has never
-        // observed actual hardware state, so no safe-to-unsafe transition has occurred. All DIO operation
+        // This is intentional: before the first successful ReadLightCurtainOSSD(out bool lTCTriggered)
+        // call, the module has never observed actual hardware state, so no safe-to-unsafe transition has
+        // occurred. All DIO operation
         // methods are guarded by IsConfigured(), so this initial inconsistency cannot produce a safety gap.
         private bool _isUnsafe;
         private LightCurtainType _lightCurtainType;
@@ -55,6 +57,12 @@ namespace TDKController
         #endregion
 
         #region IO Status Properties
+
+        /// <inheritdoc />
+        public bool[] OSSD
+        {
+            get { return new[] { _ossd1, _ossd2 }; }
+        }
 
         /// <inheritdoc />
         public bool OSSD1
@@ -238,13 +246,23 @@ namespace TDKController
             // Item1 = human-readable name, Item2 = channel config, Item3 = true if output.
             List<Tuple<string, DioChannelConfig, bool>> mappings = new List<Tuple<string, DioChannelConfig, bool>>
             {
-                Tuple.Create("LTC_DI_OSSD1", config.LTC_DI_OSSD1, false),
-                Tuple.Create("LTC_DI_OSSD2", config.LTC_DI_OSSD2, false),
                 Tuple.Create("LTC_DO_Reset", config.LTC_DO_Reset, true),
                 Tuple.Create("LTC_DO_Test", config.LTC_DO_Test, true),
                 Tuple.Create("LTC_DO_Interlock", config.LTC_DO_Interlock, true),
                 Tuple.Create("LTC_DO_LTCLed", config.LTC_DO_LTCLed, true),
             };
+
+            if (config.LTC_DI_OSSD == null || config.LTC_DI_OSSD.Length != 2)
+            {
+                throw new ArgumentException("LTC_DI_OSSD must contain exactly two mappings.", nameof(config));
+            }
+
+            for (int ossdIndex = 0; ossdIndex < config.LTC_DI_OSSD.Length; ossdIndex++)
+            {
+                mappings.Insert(
+                    ossdIndex,
+                    Tuple.Create(string.Format("LTC_DI_OSSD[{0}]", ossdIndex), config.LTC_DI_OSSD[ossdIndex], false));
+            }
 
             // Track occupied channels using "DeviceID:PortID:BitIndex" composite keys
             // to detect cross-DI/DO duplicate mappings (FR-003).
@@ -317,10 +335,11 @@ namespace TDKController
         #region DI Operations
 
         /// <inheritdoc />
-        public ErrorCode ReadLightCurtainOSSD()
+        public ErrorCode ReadLightCurtainOSSD(out bool lTCTriggered)
         {
             try
             {
+                lTCTriggered = false;
                 if (!IsConfigured())
                 {
                     return ErrorCode.LightCurtainNotConfigured;
@@ -330,12 +349,12 @@ namespace TDKController
                 // If either read fails, abort immediately without updating any cached state (fail-fast).
                 byte ossd1Value;
                 byte ossd2Value;
-                if (ReadInput(_config.LTC_DI_OSSD1, out ossd1Value) != ErrorCode.Success)
+                if (ReadInput(_config.LTC_DI_OSSD[0], out ossd1Value) != ErrorCode.Success)
                 {
                     return ErrorCode.LightCurtainDioReadFailed;
                 }
 
-                if (ReadInput(_config.LTC_DI_OSSD2, out ossd2Value) != ErrorCode.Success)
+                if (ReadInput(_config.LTC_DI_OSSD[1], out ossd2Value) != ErrorCode.Success)
                 {
                     return ErrorCode.LightCurtainDioReadFailed;
                 }
@@ -351,6 +370,7 @@ namespace TDKController
                 // Step 4: Evaluate current unsafe state — unsafe if either channel is false (FR-007).
                 bool currentUnsafe = EvaluateUnsafeState(currentOssd1, currentOssd2);
                 _isUnsafe = currentUnsafe;
+                lTCTriggered = currentUnsafe;
 
                 // Step 5: Fire StatusChanged if any cached value changed.
                 RaiseStatusChangedIfNeeded(changed);
@@ -367,6 +387,26 @@ namespace TDKController
             catch (Exception ex)
             {
                 _logger.WriteLog(LogKey, LogHeadType.Exception, string.Format("ReadLightCurtainOSSD: exception - {0}", ex.Message));
+                throw;
+            }
+        }
+
+        /// <inheritdoc />
+        public ErrorCode TriggerLightCurtainAlarm()
+        {
+            try
+            {
+                if (!IsConfigured())
+                {
+                    return ErrorCode.LightCurtainNotConfigured;
+                }
+
+                RaiseAlarmTriggered();
+                return ErrorCode.Success;
+            }
+            catch (Exception ex)
+            {
+                _logger.WriteLog(LogKey, LogHeadType.Exception, string.Format("TriggerLightCurtainAlarm: exception - {0}", ex.Message));
                 throw;
             }
         }
@@ -658,10 +698,10 @@ namespace TDKController
             switch (io)
             {
                 case LightCurtainIO.OSSD1:
-                    channelConfig = _config.LTC_DI_OSSD1;
+                    channelConfig = _config.LTC_DI_OSSD[0];
                     return true;
                 case LightCurtainIO.OSSD2:
-                    channelConfig = _config.LTC_DI_OSSD2;
+                    channelConfig = _config.LTC_DI_OSSD[1];
                     return true;
                 default:
                     channelConfig = default(DioChannelConfig);

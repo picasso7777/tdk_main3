@@ -30,8 +30,11 @@ IOBoard[] ioBoards = new IOBoard[] { dio0, dio1, dio2, dio3 };
 // 準備組態
 var config = new LightCurtainConfig
 {
-    LTC_DI_OSSD1 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
-    LTC_DI_OSSD2 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
+    LTC_DI_OSSD = new[]
+    {
+        new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
+        new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
+    },
     LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 0 },
     LTC_DO_Test = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 1 },
     LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 2 },
