@@ -35,7 +35,7 @@ enum LightCurtainVoltageMode {
 class DioChannelConfig <<struct>> {
     + DioDeviceID : int
     + PortID : int
-    + Channel_BitIndex : int
+    + BitIndex : int
 }
 
 ' =========================
@@ -108,7 +108,7 @@ class LightCurtain {
 ' this.iDos[config.LTC_DO_Test.DioDeviceID]
 '     .SetOutputBit(
 '         config.LTC_DO_Test.PortID,
-'         config.LTC_DO_Test.Channel_BitIndex,
+'         config.LTC_DO_Test.BitIndex,
 '         turnOn
 '     );
 
@@ -117,7 +117,7 @@ class LightCurtain {
 ' this.iDos[config.LTC_DO_Test.DioDeviceID]
 '     .GetDO(
 '         config.LTC_DO_Test.PortID,
-'         config.LTC_DO_Test.Channel_BitIndex,
+'         config.LTC_DO_Test.BitIndex,
 '         out turnOn
 '     );
 
@@ -131,7 +131,7 @@ class LightCurtain {
 '           iIOBoard[config.LTC_DI_OSSD1.DioDeviceID]
 '               .PushInputBit(
 '                   config.LTC_DI_OSSD1.PortID,
-'                   config.LTC_DI_OSSD1.Channel_BitIndex,
+'                   config.LTC_DI_OSSD1.BitIndex,
 '                   turnOn
 '               );
 '           return true;

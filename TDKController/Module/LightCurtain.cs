@@ -29,13 +29,12 @@ namespace TDKController
         private bool _test;
         private bool _interlock;
         private bool _ltcLed;
-        // _isUnsafe tracks whether the most recent ReadLightCurtainOSSD(out bool lTCTriggered)
-        // detected an unsafe condition.
+        // _isUnsafe tracks whether the most recent ReadLightCurtainOSSD() detected an unsafe condition.
         // It defaults to false even though _ossd1/_ossd2 also default to false (which would indicate unsafe).
-        // This is intentional: before the first successful ReadLightCurtainOSSD(out bool lTCTriggered)
-        // call, the module has never observed actual hardware state, so no safe-to-unsafe transition has
-        // occurred. All DIO operation
-        // methods are guarded by IsConfigured(), so this initial inconsistency cannot produce a safety gap.
+        // This is intentional: before the first successful ReadLightCurtainOSSD() call, the module has
+        // never observed actual hardware state, so no safe-to-unsafe transition has occurred. All DIO
+        // operation methods are guarded by IsConfigured(), so this initial inconsistency cannot produce
+        // a safety gap.
         private bool _isUnsafe;
         private LightCurtainType _lightCurtainType;
         private LightCurtainVoltageMode _lightCurtainVoltageMode;
@@ -152,14 +151,14 @@ namespace TDKController
         {
             try
             {
-                    // Reject undefined enum values.
+                // Reject undefined enum values.
                 if (!Enum.IsDefined(typeof(LightCurtainType), lightCurtainType))
                 {
                     _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("SetLightCurtainType: invalid mode {0}", lightCurtainType));
                     return ErrorCode.LightCurtainError;
                 }
 
-                    // Raise StatusChanged only when the type changes.
+                // Raise StatusChanged only when the type changes.
                 bool changed = _lightCurtainType != lightCurtainType;
                 _lightCurtainType = lightCurtainType;
                 RaiseStatusChangedIfNeeded(changed);
@@ -229,19 +228,19 @@ namespace TDKController
 
         private void UpdateConfig(LightCurtainConfig config)
         {
-                // Validate the incoming config before replacing FR-003 state.
+            // Validate the incoming config before replacing FR-003 state.
             ValidateConfig(config);
 
-                // Detect whether config-driven mode values changed.
+            // Detect whether config-driven mode values changed.
             bool shouldRaiseStatusChanged = _lightCurtainType != config.LightCurtainType
                 || _lightCurtainVoltageMode != config.LightCurtainVoltageMode;
 
-                // Sync accepted config values into module state.
+            // Sync accepted config values into module state.
             _config = config;
             _lightCurtainType = config.LightCurtainType;
             _lightCurtainVoltageMode = config.LightCurtainVoltageMode;
 
-                // Raise StatusChanged only when config-driven modes changed.
+            // Raise StatusChanged only when config-driven modes changed.
             RaiseStatusChangedIfNeeded(shouldRaiseStatusChanged);
         }
 

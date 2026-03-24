@@ -32,13 +32,13 @@ var config = new LightCurtainConfig
 {
     LTC_DI_OSSD = new[]
     {
-        new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
-        new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
+        new DioChannelConfig { DioDeviceID = 0, PortID = 0, BitIndex = 0 },
+        new DioChannelConfig { DioDeviceID = 0, PortID = 0, BitIndex = 1 },
     },
-    LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 0 },
-    LTC_DO_Test = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 1 },
-    LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 2 },
-    LTC_DO_LTCLed = new DioChannelConfig { DioDeviceID = 2, PortID = 0, Channel_BitIndex = 3 },
+    LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 2, PortID = 0, BitIndex = 0 },
+    LTC_DO_Test = new DioChannelConfig { DioDeviceID = 2, PortID = 0, BitIndex = 1 },
+    LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 2, PortID = 0, BitIndex = 2 },
+    LTC_DO_LTCLed = new DioChannelConfig { DioDeviceID = 2, PortID = 0, BitIndex = 3 },
     LightCurtainType = LightCurtainType.Enable_Always,
     LightCurtainVoltageMode = LightCurtainVoltageMode.Voltage24V
 };

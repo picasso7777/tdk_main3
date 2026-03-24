@@ -60,7 +60,7 @@
 |------|------|------|
 | DioDeviceID | int | `IOBoard[]` 陣列索引 |
 | PortID | int | Port 索引（零起始）|
-| Channel_BitIndex | int | Port 內 bit 索引（零起始）|
+| BitIndex | int | Port 內 bit 索引（零起始）|
 
 **設計決策**：`DioDeviceID` 使用 `-1` 作為 sentinel 表示「未設定」。驗證時若任一 `DioChannelConfig` 的 `DioDeviceID < 0`，則視為必要映射缺漏並拒絕組態。
 
@@ -95,7 +95,7 @@
 **驗證規則** (FR-003):
 - 所有 6 個 DioChannelConfig 的 `DioDeviceID` 必須在 `IOBoard[]` 陣列索引範圍內
 - 所有 required mappings 必須完整提供，不得保留未設定的預設值（`DioDeviceID < 0` 視為未設定）
-- 任兩個 required signals 不得映射到相同的 `(DioDeviceID, PortID, Channel_BitIndex)` 組合，不區分 DI/DO 類型
+- 任兩個 required signals 不得映射到相同的 `(DioDeviceID, PortID, BitIndex)` 組合，不區分 DI/DO 類型
 
 ### LightCurtainAlarmEventArgs
 

@@ -23,7 +23,7 @@
 
 **Rationale**:
 - 目前專案中不存在此結構
-- PlantUML 規格定義為 struct，含三個 int 欄位：`DioDeviceID`, `PortID`, `Channel_BitIndex`
+- PlantUML 規格定義為 struct，含三個 int 欄位：`DioDeviceID`, `PortID`, `BitIndex`
 - 放在 LightCurtainConfig.cs 同檔以遵循單一模組單一檔案精神
 - 宣告為 `public struct` 以供介面使用
 
