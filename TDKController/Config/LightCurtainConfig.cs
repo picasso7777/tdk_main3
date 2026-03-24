@@ -19,7 +19,7 @@ namespace TDKController
         /// <summary>
         /// Gets or sets the zero-based bit index within the selected port.
         /// </summary>
-        public int BitIndex { get; set; }
+        public int Channel_BitIndex { get; set; }
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ namespace TDKController
             {
                 DioDeviceID = -1,
                 PortID = -1,
-                BitIndex = -1,
+                Channel_BitIndex = -1,
             };
         }
     }

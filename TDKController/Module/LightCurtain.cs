@@ -300,7 +300,7 @@ namespace TDKController
                     "{0}:{1}:{2}",
                     channelConfig.DioDeviceID,
                     channelConfig.PortID,
-                    channelConfig.BitIndex);
+                    channelConfig.Channel_BitIndex);
                 if (!occupiedChannels.Add(channelKey))
                 {
                     throw new ArgumentException(string.Format("{0} duplicates an existing DIO mapping ({1}).", mappingName, channelKey), nameof(config));
@@ -312,7 +312,7 @@ namespace TDKController
         // Uses output-side or input-side counts depending on the isOutput flag.
         private static void ValidateChannelRange(string mappingName, DioChannelConfig channelConfig, IOBoard ioBoard, bool isOutput)
         {
-            if (channelConfig.PortID < 0 || channelConfig.BitIndex < 0)
+            if (channelConfig.PortID < 0 || channelConfig.Channel_BitIndex < 0)
             {
                 throw new ArgumentException(string.Format("{0} contains a negative port or bit index.", mappingName));
             }
@@ -324,9 +324,9 @@ namespace TDKController
                 throw new ArgumentException(string.Format("{0} references out-of-range port {1}.", mappingName, channelConfig.PortID));
             }
 
-            if (channelConfig.BitIndex >= bitCount)
+            if (channelConfig.Channel_BitIndex >= bitCount)
             {
-                throw new ArgumentException(string.Format("{0} references out-of-range bit {1}.", mappingName, channelConfig.BitIndex));
+                throw new ArgumentException(string.Format("{0} references out-of-range bit {1}.", mappingName, channelConfig.Channel_BitIndex));
             }
         }
 
@@ -613,10 +613,10 @@ namespace TDKController
         private ErrorCode ReadInput(DioChannelConfig channelConfig, out byte value)
         {
             value = 0;
-            int result = _ioBoards[channelConfig.DioDeviceID].GetInputBit(channelConfig.PortID, channelConfig.BitIndex, out value);
+            int result = _ioBoards[channelConfig.DioDeviceID].GetInputBit(channelConfig.PortID, channelConfig.Channel_BitIndex, out value);
             if (result != 0)
             {
-                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("ReadInput: failed for board={0}, port={1}, bit={2}, result={3}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.BitIndex, result));
+                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("ReadInput: failed for board={0}, port={1}, bit={2}, result={3}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.Channel_BitIndex, result));
                 return ErrorCode.LightCurtainDioReadFailed;
             }
 
@@ -627,10 +627,10 @@ namespace TDKController
         private ErrorCode ReadOutput(DioChannelConfig channelConfig, out byte value)
         {
             value = 0;
-            int result = _ioBoards[channelConfig.DioDeviceID].GetOutputBit(channelConfig.PortID, channelConfig.BitIndex, out value);
+            int result = _ioBoards[channelConfig.DioDeviceID].GetOutputBit(channelConfig.PortID, channelConfig.Channel_BitIndex, out value);
             if (result != 0)
             {
-                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("ReadOutput: failed for board={0}, port={1}, bit={2}, result={3}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.BitIndex, result));
+                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("ReadOutput: failed for board={0}, port={1}, bit={2}, result={3}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.Channel_BitIndex, result));
                 return ErrorCode.LightCurtainDioReadFailed;
             }
 
@@ -641,10 +641,10 @@ namespace TDKController
         private ErrorCode WriteOutput(DioChannelConfig channelConfig, bool turnOn)
         {
             byte rawValue = ConvertToByte(turnOn);
-            int result = _ioBoards[channelConfig.DioDeviceID].SetOutputBit(channelConfig.PortID, channelConfig.BitIndex, rawValue);
+            int result = _ioBoards[channelConfig.DioDeviceID].SetOutputBit(channelConfig.PortID, channelConfig.Channel_BitIndex, rawValue);
             if (result != 0)
             {
-                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("WriteOutput: failed for board={0}, port={1}, bit={2}, value={3}, result={4}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.BitIndex, rawValue, result));
+                _logger.WriteLog(LogKey, LogHeadType.Error, string.Format("WriteOutput: failed for board={0}, port={1}, bit={2}, value={3}, result={4}", channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.Channel_BitIndex, rawValue, result));
                 return ErrorCode.LightCurtainDioWriteFailed;
             }
 
