@@ -758,12 +758,12 @@ namespace TDKController.Tests.Unit
         {
             return new LightCurtainConfig
             {
-                LTC_DI_OSSD1 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 0 },
-                LTC_DI_OSSD2 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, Channel_BitIndex = 1 },
-                LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 0 },
-                LTC_DO_Test = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 1 },
-                LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 2 },
-                LTC_DO_LTCLed = new DioChannelConfig { DioDeviceID = 1, PortID = 0, Channel_BitIndex = 3 },
+                LTC_DI_OSSD1 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, BitIndex = 0 },
+                LTC_DI_OSSD2 = new DioChannelConfig { DioDeviceID = 0, PortID = 0, BitIndex = 1 },
+                LTC_DO_Reset = new DioChannelConfig { DioDeviceID = 1, PortID = 0, BitIndex = 0 },
+                LTC_DO_Test = new DioChannelConfig { DioDeviceID = 1, PortID = 0, BitIndex = 1 },
+                LTC_DO_Interlock = new DioChannelConfig { DioDeviceID = 1, PortID = 0, BitIndex = 2 },
+                LTC_DO_LTCLed = new DioChannelConfig { DioDeviceID = 1, PortID = 0, BitIndex = 3 },
                 LightCurtainType = LightCurtainType.Disable,
                 LightCurtainVoltageMode = LightCurtainVoltageMode.Voltage24V,
             };
@@ -827,7 +827,7 @@ namespace TDKController.Tests.Unit
 
         private string GetKey(DioChannelConfig channelConfig)
         {
-            return GetKey(channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.Channel_BitIndex);
+            return GetKey(channelConfig.DioDeviceID, channelConfig.PortID, channelConfig.BitIndex);
         }
 
         private static string GetKey(int dioDeviceId, int portId, int bitIndex)
